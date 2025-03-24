@@ -1,0 +1,1 @@
+var _NO_SLIDESHOW = true;

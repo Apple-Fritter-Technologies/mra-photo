@@ -1,0 +1,75 @@
+:root {
+    --THEME-COLOR-A: #ffffff;/*other ideas: #c28285*/
+    --THEME-COLOR-A-DARKENED:#ab6e70;
+    --THEME-COLOR-B:white;
+    --THEME-COLOR-C:black;
+    --THEME-COLOR-DARK-ONE:rgb(20,17,17);
+    --THEME-COLOR-DARK-TWO:rgb(20,17,17);
+    /*--THEME-COLOR-CREAM:rgb(255, 254, 230);*/
+    --THEME-COLOR-CREAM:rgb(254, 254, 254);
+    /*--THEME-COLOR-CREAM:rgb(239, 239, 239);*/
+    --THEME-FONT-WIDE:Abril Fatface;
+    --THEME-FONT-TITLE:'Morgana';
+    --THEME-FONT-PARAGRAPH:'Cormorant Infant';
+    --TACTICAL-NAVBUTTON-WIDTH: 16.6%;
+    --TACTICAL-NAVBAR-WIDTH:70%;
+    --TACTICAL-SLIDESHOW-HEIGHT:400px;
+    --FOOTER-SPACE-WIDTH:5%;
+}
+@font-face {
+    font-family:Morgana;
+    src: url("./morgana-2.ttf");
+}
+body {
+    margin:0px;
+}
+#main-area {
+    height:calc(100vh - 70px);/*give it the rest of the area of the screen 100% of the height minus the heighth of the top bar.*/
+    width:100%;
+    overflow-y:scroll;
+    overflow-x:hidden;
+    margin-top:70px;
+}
+.NOUNDERLINE:hover {
+    text-decoration-line:none;
+}
+.NOUNDERLINE:active {
+    text-decoration-line:none;
+}
+.NOUNDERLINE:visited {
+    text-decoration-line:none;
+}
+/*EDIT THE SCROLL-BAR (if the browser supports it)*/
+#main-area::-webkit-scrollbar {
+    width:10px;
+}
+#main-area::-webkit-scrollbar-track {
+    width:10px;
+    background-color:rgb(247, 247, 247);
+}
+#main-area::-webkit-scrollbar-track:hover {
+    width:20px;
+    background-color:rgba(153, 153, 153,0.3);
+}
+#main-area::-webkit-scrollbar:hover {
+    width:30px;
+}
+#main-area::-webkit-scrollbar-thumb {
+    width:10px;
+    background-color:rgb(100, 100, 100);
+    border-top-right-radius:0px;
+    border-top-left-radius:8px;
+    border-bottom-right-radius:0px;
+    border-bottom-left-radius:8px;
+}
+#wipe {
+    width:100%;
+    background-color:white;
+    height: calc(100vh - 70px);
+    position:fixed;
+    top:70px;
+    left:0px;
+    transition:left 0.5s, width 0.5s;
+    z-index:30;
+    display:none;
+}

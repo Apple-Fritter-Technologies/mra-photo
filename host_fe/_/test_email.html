@@ -1,0 +1,68 @@
+<html>
+    <body>
+        <h1>
+            Send Email Test Here
+        </h1>
+        <script>
+            /*
+            
+                        FIELDS
+
+                email_type      type            The type of email. `contact` for contact, `request` for request.
+                first_name      fname
+                last_name       lname
+                email           email
+                home_address    home
+                phone_number    phone
+                package_name    package
+                location_idea   location
+                proposed_date   date
+
+                subject         subject
+                message         message
+                email           email
+
+
+
+            */
+            function sendEmail(subject,message,email) {
+                let form = document.createElement("form");
+
+                form.method = "post";
+                form.action = "";
+
+                let keys = ["subject","message","email"];
+                let valoo = [subject,  message,  email];
+
+                keys.forEach((value,index) => {
+                    let formElement = document.createElement("input");
+                    formElement.name = value;
+                    formElement.type = "text";
+                    formElement.value = valoo[index];
+
+                    form.appendChild(formElement);
+                })
+
+                let formElement = document.createElement("input");
+                formElement.name = "type";
+                formElement.type = "text";
+                formElement.value = "contact";
+
+                form.appendChild(formElement);
+
+                document.body.appendChild(form);
+
+                let request = new XMLHttpRequest();
+
+                request.open("post","./send_request/index.php",true);
+
+                request.onload = () => {
+                    console.log(request.responseText);
+                }
+
+                request.send(new FormData(form));
+
+            }
+        </script>
+    </body>
+</html>

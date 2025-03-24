@@ -1,0 +1,19 @@
+#request-logo {
+    width:200px;
+    height:auto;
+    clip-path: circle(90px);
+}
+#image-holder {
+    width:200px;
+    height:fit-content;
+    margin-left:calc((100% - 200px) / 2);
+    border:3px solid rgb(234, 226, 221);
+    border-radius:100px;
+    margin-top:50px;
+
+}
+@media (max-width:1000px) {
+    #request-logo {
+        display:none;
+    }
+}

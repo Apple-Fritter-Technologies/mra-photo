@@ -1,0 +1,15 @@
+#section-title-holder {
+    background-image: url("../images/meetmaria3.jpg");
+    background-size:cover;
+    height:300px;
+    background-position:0px 0px;
+    margin-top:0px;
+
+}
+#section-title {
+    color:white;
+    font-family:var(--THEME-FONT-TITLE);
+    text-align:center;
+    font-size:100px;
+    
+}

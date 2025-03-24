@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+	<!--
+		Maria's Photography, el_javascriptor.
+		index.css: main stylesheet
+		manageNav.css: stylesheet for the top bar.
+	-->
+	<head>
+		<!--Load fonts-->
+		<title>Maria Rose Photography</title>
+		<link rel="icon" type="image/x-icon" href="../images/images-logos/favicon.png">
+		<meta name="description" content="Maria Rose Photography: Maria is a natural light, lifestyle photographer in the Metro Detroit area.">
+		<meta name="keywords" content="maria,rose,photography,photographer">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="favicon" href="../images/main-logo.png">
+
+		<!--<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">-->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<!--<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300&display=swap" rel="stylesheet">-->
+		<!--<link href="https://fonts.googleapis.com/css2?family=Allura" rel="stylesheet"></link>-->
+		<!--<link href="https://fonts.googleapis.com/css2?family=Aboreto" rel="stylesheet">-->
+		<link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:wght@300&display=swap" rel="stylesheet">
+
+		
+		<!--Load CSS sheets in the ../css folder-->
+		<link rel="stylesheet" href="../css/index.css?num=28">
+		<link rel="stylesheet" href="./index.css">
+		<link rel="stylesheet" href="../css/manageNav.css?num=28">
+		<link rel="stylesheet" href="../css/blocks.css?num=28">
+		<link rel="stylesheet" href="../css/slideshow.css?num=28">
+		<link rel="stylesheet" href="../css/media.css?num=28">
+
+		<!--Load JS scripts from ../js folder-->
+		<script src="./flags.js"></script>
+		<script src="../js/wipe-function.js"></script>
+		<script src="../js/slideshow-module.js?num=28"></script>
+		<script src="../js/index.js?num=28"></script>
+		<script src="../js/_TEMPFUNCTIONS.js?num=28"></script>
+		<script src="../js/fade-elements.js?num=28"></script>
+	</head>
+	<body>
+		<div id="all">
+			<div id="topNav">
+				<!--<img src="../images/images-logos/logo v1.1.png" id="main-logo">deprecated title version-->
+				<h1 id="main-title">Maria Rose</h1>
+
+				<!--Here is our navigation bar. By default, it takes up 50% of the width of the screen, the title has the
+				other 50% (manageNav.css). We defined an unordered list of buttons (ul id="navBtns") and each button is part 
+				of a List Item (li) and has a Button inside (button).-->
+				<div id="navBar">
+					<ul id="navBtns">
+						<div id="theNavs">
+							<li class="navBtn">
+								<button onclick='relocate("../index.html")' class="btn"><span class="desktop-text">HOME</span><span class="mobile-text">Home</span></button>
+							</li>
+							<li class="navBtn">
+								<button onclick='relocate("../meetmaria/index.html")' class="btn"><span class="desktop-text">MEET MARIA</span><span class="mobile-text">Meet Maria</span></button>
+							</li>
+							<li class="navBtn">
+								<button onclick='relocate("../experience/index.html")' class="btn"><span class="desktop-text">EXPERIENCE</span><span class="mobile-text">Experience</span></button>
+							</li>
+							<li class="navBtn">
+								<button onclick='relocate("../portfolio/index.html")' class="btn"><span class="desktop-text">PORTFOLIO</span><span class="mobile-text">Portfolio</span></button>
+							</li>
+							<li class="navBtn">
+								<button onclick='relocate("../investment/index.html")' class="btn" id="lastNavBtn"><span class="desktop-text">INVESTMENT</span><span class="mobile-text">Investment</span></button>
+							</li>
+							<li class="navBtn">
+								<button onclick='relocate("../book-me/index.html")' class="btn" onclick="startLogin()"><span class="desktop-text">BOOK ME</span><span class="mobile-text">Book Me</span></button>
+							</li>
+						</div>
+					</ul>
+				</div>
+				<!--<button id="mobileBtn">MENU</button>-->
+				<button id="mobileBtn"><img alt="Mobile Nav Icon" src="../images/images-icons/hamburger-2.png" id="image-thumbnail"></button>
+			</div>
+			<div id="main-area" onscroll="fadeElements(event)">
+
+
+				<!-- (normally slideshow would be here) -->
+
+				<!-- <div id="slideshow" class="block">
+					
+				</div> -->
+				<div id="section-title-holder" class="block">
+					<h1 id="section-title">Experience</h1>
+				</div>
+
+
+
+				<!--Down here is the main area. Technically it lies *under* the <div id="topNav">. 
+					Here we are experimenting with two main sorting methods: we have BLOCKS, which
+					will contain text, space, etc, and IMAGES, which will be images.-->
+				<div class="block" id="block1">
+					<p id="microSubSlideshow" class="microtext" style="margin-top:0px">GOD CREATES THE BEAUTY</p>
+					<h1 id="largeText" style="margin-bottom:0px; line-height:40px;">My Camera and I are a Witness</h1>
+				</div>
+				<div class="block" id="block2">
+					<div class="right-side fade right_fade">
+						<img alt="first_image" src="../images/experience-page-1.jpg" class="tactical-image">
+					</div>
+					<div class="left-side fade left_fade">
+						<div class="text-holder">
+							<h1 class="title2">My Focus</h1>
+							<p class="subText2">I have been doing photography for a little over five years. Since becoming a mom, it has become even more important to me to have high quality photos that are  taken through someone else's view that I can look back on and remember just how tiny my baby was at one point. I focus on capturing the growth of a family. From maternity, to newborn, to cake smash, to yearly family portraits, this is where I want to invest my time, helping other families document their precious family for years to come.
+							</p>
+							</div>
+					</div>
+				</div>
+				<div class="block" id="block3">
+					<div class="left-side fade left_fade">
+						<img alt="second_image" src="../images/experience-page-2.jpg" class="tactical-image">
+					</div>
+					<div class="right-side fade right_fade">
+						<div class="text-holder">
+							<h1 class="title2">Locations</h1>
+							<p class="subText2">I am a natural light photographer who loves the golden hour! The hour before sunset gives off the most delicate glow that will make your pictures warm and dreamy. Whether your style is a flower field, an apple orchard, or the city, I will follow you to wherever you feel most comfortable and be with you every step of the way, </p>
+							
+						</div>
+					</div>
+				</div>
+				<div class="block" id="block3">
+					<div class="right-side fade right_fade">
+						<img alt="second_image" src="../images/photo-3.jpg" class="tactical-image">
+					</div>
+					<div class="left-side fade left_fade">
+						<div class="text-holder">
+							<h1 class="title2">Before the Session</h1>
+							<p class="subText2">Once your session is booked, you will receive an email with a few preparations for your session as well as expectations as to what to expect during your session.. I will offer styling help to ensure your outfits are flattering and coordinating, tips for keeping small children happy during the session, as well as how to prepare the kids (and husband!)  for what is to come.</p>
+							
+						</div>
+					</div>
+				</div>
+
+
+				<div class="block" id="footer">
+					<div class="footer-section" style="text-align:center;">
+						<img alt="MRA Photography Logo" src="../images/images-logos/logo v1.1.png" id="footer-logo">
+						<div id="mobile-social-media">
+							<img alt="Facebook Icon" src="../images/images-icons/facebook_logo.png" class="media-icon" style="margin-left:0px" onclick="window.open('https:\/\/www.facebook.com/profile.php?id=100084896798498&mibextid=zLoPMf','_blank')">
+							<img alt="Instagram Icon" src="../images/images-icons/instagram_logo.png" class="media-icon" onclick="window.open('https:\/\/www.instagram.com/m.rose.a.photography?igsh=M2c3a2p5ZHZvdXZk','_blank')">
+							<img alt="Email Icon" src="../images/images-icons/email_logo.png" class="media-icon" onclick="window.open('mailto:m.rose.a.photography@gmail.com','_blank')">
+						</div>
+						<p id="about-me-text">Maria is a natural light, lifestyle photographer in the Metro Detroit area.</p>
+					</div>
+					<div class="footer-section">
+						<form id="contact-maria">
+							<input type="text" class="input_text" id="subject" placeholder="Subject">
+							<input type="text" class="input_text" id="body" placeholder="What do you want to say?">
+							<input type="email" class="input_text" id="email" placeholder="your.email@example.com" autocomplete="email">
+							<input type="submit" id="submit-contact">
+						</form>
+					</div>
+
+					<div class="footer-section" style="text-align:center;">
+						<div id="social-media">
+							<img alt="Facebook Icon" src="../images/images-icons/facebook_logo.png" class="media-icon" style="margin-left:0px" onclick="window.open('https:\/\/www.facebook.com/profile.php?id=100084896798498&mibextid=zLoPMf','_blank')">
+							<img alt="Instagram Icon" src="../images/images-icons/instagram_logo.png" class="media-icon" onclick="window.open('https:\/\/www.instagram.com/m.rose.a.photography?igsh=M2c3a2p5ZHZvdXZk','_blank')">
+							<img alt="Email Icon" src="../images/images-icons/email_logo.png" class="media-icon" onclick="window.open('mailto:m.rose.a.photography@gmail.com','_blank')">
+						</div>
+						<p id="contact-me">I'm here to capture your precious moments in a lifestyle kind of way. Candid, Crisp, and Clean. I have set the LORD always before me; because he is at my right hand, I will not be shaken. Psalm 16:8</p>					</div>
+					<div class="micro-footer" id="bottommost">
+						<p id="footer-text">MRAPHOTOGRAPHY.COM - ALL RIGHTS RESERVED</p>
+					</div>
+					<!--<input type="color" id="TEMP_COLOR_PICKER" onchange="TEMP_changebackground()">-->
+				</div>
+			</div>
+		</div>
+		<div id="wipe"></div>
+	</body>
+</html>
