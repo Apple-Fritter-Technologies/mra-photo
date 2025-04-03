@@ -1,8 +1,21 @@
 import Image from "next/image";
-import { useRef, useState, useEffect, MouseEvent, TouchEvent } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  MouseEvent,
+  TouchEvent,
+  WheelEvent,
+} from "react";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GalleryModalProps } from "@/type/intrerface";
 
@@ -22,6 +35,24 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
       setModalImageIndex(initialImageIndex);
     }
   }, [open, initialImageIndex]);
+
+  // Handle mobile viewport height adjustments
+  useEffect(() => {
+    if (open) {
+      // Fix for mobile viewport height issues
+      const updateViewportHeight = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty("--vh", `${vh}px`);
+      };
+
+      updateViewportHeight();
+      window.addEventListener("resize", updateViewportHeight);
+
+      return () => {
+        window.removeEventListener("resize", updateViewportHeight);
+      };
+    }
+  }, [open]);
 
   // Gallery drag functionality
   const [isGalleryDragging, setIsGalleryDragging] = useState(false);
@@ -170,40 +201,144 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
+  // Add zoom-related state
+  const [zoomLevel, setZoomLevel] = useState<number[]>([]);
+  const [isPinching, setIsPinching] = useState(false);
+  const [initialPinchDistance, setInitialPinchDistance] = useState(0);
+  const imageRefs = useRef<(HTMLImageElement | null)[]>([]);
+
+  // Initialize zoom levels when modal opens or images change
+  useEffect(() => {
+    if (open) {
+      setZoomLevel(Array(images.length).fill(1));
+      imageRefs.current = Array(images.length).fill(null);
+    }
+  }, [open, images.length]);
+
+  // Function to handle zoom level changes
+  const handleZoom = (index: number, newZoom: number) => {
+    // Restrict zoom between 1 and 5
+    const clampedZoom = Math.min(Math.max(newZoom, 1), 5);
+
+    setZoomLevel((prevZoom) => {
+      const newZoomLevels = [...prevZoom];
+      newZoomLevels[index] = clampedZoom;
+      return newZoomLevels;
+    });
+  };
+
+  // Reset zoom when changing images
+  useEffect(() => {
+    if (zoomLevel[modalImageIndex] && zoomLevel[modalImageIndex] > 1) {
+      // Reset zoom for the current image when changing images
+      const newZoomLevels = [...zoomLevel];
+      newZoomLevels[modalImageIndex] = 1;
+      setZoomLevel(newZoomLevels);
+    }
+  }, [modalImageIndex]);
+
+  // Pinch to zoom functionality
+  const handleTouchStart = (e: TouchEvent) => {
+    if (e.touches.length === 2) {
+      // This is a pinch gesture
+      setIsPinching(true);
+      const dist = getDistanceBetweenTouches(e.touches);
+      setInitialPinchDistance(dist);
+      // Prevent gallery drag when pinching
+      e.stopPropagation();
+      e.preventDefault(); // Add this line to prevent default behavior
+    } else if (e.touches.length === 1 && zoomLevel[modalImageIndex] === 1) {
+      // Only allow gallery drag when not zoomed in
+      handleGalleryTouchStart(e);
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (isPinching && e.touches.length === 2) {
+      const currentDistance = getDistanceBetweenTouches(e.touches);
+      const scaleFactor = currentDistance / initialPinchDistance;
+      // Use a smaller scale factor for smoother zooming on mobile
+      const adjustedScaleFactor = 1 + (scaleFactor - 1) * 0.5;
+      const newZoom = zoomLevel[modalImageIndex] * adjustedScaleFactor;
+
+      handleZoom(modalImageIndex, newZoom);
+      setInitialPinchDistance(currentDistance);
+      e.preventDefault();
+      e.stopPropagation();
+    } else if (e.touches.length === 1 && zoomLevel[modalImageIndex] === 1) {
+      // Only allow gallery drag when not zoomed in
+      handleGalleryTouchMove(e);
+    }
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (isPinching) {
+      setIsPinching(false);
+      e.stopPropagation();
+    } else if (zoomLevel[modalImageIndex] === 1) {
+      handleGalleryTouchEnd();
+    }
+  };
+
+  // Calculate distance between two touch points
+  const getDistanceBetweenTouches = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Mouse wheel zoom
+  const handleWheel = (e: WheelEvent) => {
+    if (e.deltaY !== 0) {
+      // Zoom in/out based on scroll direction
+      const zoomDelta = e.deltaY > 0 ? -0.2 : 0.2;
+      const newZoom = zoomLevel[modalImageIndex] + zoomDelta;
+      handleZoom(modalImageIndex, newZoom);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 border-none rounded-2xl shadow-2xl bg-primary overflow-hidden scale-95">
+      <DialogContent className="lg:min-w-5xl md:min-w-3xl w-full max-h-[90vh] p-0 border-none rounded-lg md:rounded-2xl shadow-2xl bg-primary overflow-hidden scale-95 sm:scale-100">
         <DialogTitle hidden />
-        <div className="flex items-center justify-between p-4 border-b border-primary/20">
-          <h3 className="text-lg font-medium text-secondary truncate">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-primary/20">
+          <h3 className="text-base sm:text-lg font-medium text-secondary truncate">
             {images[modalImageIndex]?.alt || "Image Gallery"}
           </h3>
         </div>
 
         {/* Gallery container with drag support */}
         <div
-          className="relative min-h-[65vh] w-full flex items-center justify-center gap-2 p-4 bg-primary/80"
+          className="relative min-h-[50vh] sm:min-h-[65vh] w-full flex items-center justify-center gap-1 sm:gap-2 p-2 sm:p-4 bg-primary/80"
+          style={open ? { minHeight: "calc(var(--vh, 1vh) * 50)" } : {}}
           ref={galleryRef}
         >
           {/* backward button */}
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10 shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
             onClick={() => navigateModal("prev")}
             aria-label="Previous image"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
 
           <div
             className="flex justify-center items-center w-full h-full cursor-grab active:cursor-grabbing overflow-hidden"
-            onMouseDown={handleGalleryMouseDown}
-            onMouseMove={handleGalleryMouseMove}
-            onMouseUp={handleGalleryMouseUp}
-            onTouchStart={handleGalleryTouchStart}
-            onTouchMove={handleGalleryTouchMove}
-            onTouchEnd={handleGalleryTouchEnd}
+            onMouseDown={(e) =>
+              zoomLevel[modalImageIndex] === 1 && handleGalleryMouseDown(e)
+            }
+            onMouseMove={(e) =>
+              zoomLevel[modalImageIndex] === 1 && handleGalleryMouseMove(e)
+            }
+            onMouseUp={() =>
+              zoomLevel[modalImageIndex] === 1 && handleGalleryMouseUp()
+            }
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onWheel={handleWheel}
           >
             <div
               className="flex transition-transform h-full"
@@ -215,19 +350,19 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                   className="w-full min-w-full flex items-center justify-center"
                   style={{ flex: "0 0 100%" }}
                 >
-                  <div className="relative max-h-[65vh] max-w-full flex items-center justify-center">
+                  <div className="relative max-w-full flex items-center justify-center">
                     <Image
+                      ref={(el) => {
+                        imageRefs.current[i] = el;
+                      }}
                       src={img.src}
                       alt={img.alt}
                       width={800}
                       height={1200}
-                      className="rounded-lg shadow-lg"
+                      className="rounded-lg shadow-lg object-contain w-full h-full max-w-[98%] max-h-[98%] transition-transform duration-300 ease-in-out"
                       style={{
-                        maxHeight: "65vh",
-                        maxWidth: "98%",
-                        width: "auto",
-                        height: "auto",
-                        objectFit: "contain",
+                        transform: `scale(${zoomLevel[i] || 1})`,
+                        cursor: zoomLevel[i] > 1 ? "zoom-out" : "zoom-in",
                       }}
                       draggable={false}
                       priority={
@@ -249,56 +384,97 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
+            className="rounded-full w-8 h-8 sm:w-10 sm:h-10 shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
             onClick={() => navigateModal("next")}
             aria-label="Next image"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
 
           {/* Image counter */}
-          <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium shadow-sm bg-primary/10 text-secondary border border-secondary/30">
+          <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium shadow-sm bg-primary/10 text-secondary border border-secondary/30">
             {modalImageIndex + 1} / {images.length}
+          </div>
+
+          {/* Zoom controls */}
+          <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 flex gap-1 sm:gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full w-7 h-7 sm:w-8 sm:h-8 shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
+              onClick={() =>
+                handleZoom(modalImageIndex, zoomLevel[modalImageIndex] - 0.5)
+              }
+              disabled={zoomLevel[modalImageIndex] <= 1}
+              aria-label="Zoom out"
+            >
+              <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full w-7 h-7 sm:w-8 sm:h-8 shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
+              onClick={() =>
+                handleZoom(modalImageIndex, zoomLevel[modalImageIndex] + 0.5)
+              }
+              disabled={zoomLevel[modalImageIndex] >= 5}
+              aria-label="Zoom in"
+            >
+              <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Button>
+
+            {zoomLevel[modalImageIndex] > 1 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full w-7 h-7 sm:w-8 sm:h-8 shadow-md hover:shadow-lg transition-all bg-primary text-secondary border border-secondary/30"
+                onClick={() => handleZoom(modalImageIndex, 1)}
+                aria-label="Reset zoom"
+              >
+                <RotateCw className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Enhanced thumbnail preview with scrolling indicators */}
-        <div className="relative px-12 py-4 overflow-hidden">
+        <div className="relative px-8 sm:px-12 py-2 sm:py-4 overflow-hidden">
           {/* Scroll indicators/controls */}
-          {images.length > 6 && (
+          {images.length > 4 && (
             <>
-              <div className="absolute left-2 top-0 bottom-0 flex items-center">
+              <div className="absolute left-1 sm:left-2 top-0 bottom-0 flex items-center">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-full h-8 w-8 bg-primary/50 text-secondary"
+                  className="rounded-full h-6 w-6 sm:h-8 sm:w-8 bg-primary/50 text-secondary"
                   onClick={() => {
                     if (thumbnailContainerRef.current) {
                       thumbnailContainerRef.current.scrollBy({
-                        left: -200,
+                        left: -150,
                         behavior: "smooth",
                       });
                     }
                   }}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
-              <div className="absolute right-2 top-0 bottom-0 flex items-center">
+              <div className="absolute right-1 sm:right-2 top-0 bottom-0 flex items-center">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-full h-8 w-8 bg-primary/50 text-secondary"
+                  className="rounded-full h-6 w-6 sm:h-8 sm:w-8 bg-primary/50 text-secondary"
                   onClick={() => {
                     if (thumbnailContainerRef.current) {
                       thumbnailContainerRef.current.scrollBy({
-                        left: 200,
+                        left: 150,
                         behavior: "smooth",
                       });
                     }
                   }}
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </>
@@ -307,7 +483,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
           {/* Thumbnail scroller */}
           <div
             ref={thumbnailContainerRef}
-            className="flex gap-2 overflow-x-auto p-2 ps-28 items-center justify-center"
+            className="flex gap-1 sm:gap-2 overflow-x-auto p-1 sm:p-2 ps-8 sm:ps-28 items-center justify-center"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -317,7 +493,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
               <button
                 key={`thumb-${i}`}
                 className={cn(
-                  "relative rounded-md overflow-hidden transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary w-14 h-20 flex-shrink-0",
+                  "relative rounded-md overflow-hidden transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary w-10 h-14 sm:w-14 sm:h-20 flex-shrink-0",
                   modalImageIndex === i
                     ? "ring-2 ring-secondary scale-105 shadow-md"
                     : "opacity-70 hover:opacity-100"
@@ -328,7 +504,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                   src={img.src}
                   alt={`Thumbnail ${i + 1}`}
                   fill
-                  sizes="56px"
+                  sizes="(max-width: 640px) 40px, 56px"
                   className="object-cover"
                   draggable={false}
                 />

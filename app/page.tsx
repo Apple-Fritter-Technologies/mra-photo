@@ -21,7 +21,7 @@ export default function Home() {
       <div className="flex flex-col items-center">
         <div className="flex flex-col items-center gap-6 my-12">
           <p>MICHIGAN FAMILY PHOTOGRAPHER</p>
-          <h1 className="font-title md:text-6xl text-4xl font-bold">
+          <h1 className="font-title md:text-6xl text-4xl">
             Documenting Life's Precious Moments
           </h1>
           <p className="mt-4">MATERNITY, FAMILY, SENIOR, MILESTONE, & MORE</p>
