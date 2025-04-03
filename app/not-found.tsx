@@ -11,7 +11,7 @@ export default function NotFound() {
       </h1>
 
       <p className="text-lg text-neutral-600 dark:text-neutral-300 mb-8">
-        The page you're looking for is out of frame.
+        The page you&apos;re looking for is out of frame.
       </p>
 
       <Link href="/">
