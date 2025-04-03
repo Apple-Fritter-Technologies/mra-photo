@@ -42,7 +42,7 @@ const Footer = () => {
 
           {/* Navigation */}
           <div className="flex flex-col items-center sm:items-start">
-            <h3 className="font-title mb-4 text-secondary text-xl sm:text-2xl font-bold relative inline-block">
+            <h3 className="font-title mb-4 text-secondary text-2xl sm:text-3xl font-bold relative inline-block">
               <span className="relative after:absolute after:bottom-0 after:left-0 after:w-full sm:after:w-1/2 after:h-[2px] after:bg-secondary/30">
                 Quick Links
               </span>
@@ -66,37 +66,37 @@ const Footer = () => {
 
           {/* Contact and social */}
           <div className="flex flex-col items-center sm:items-start">
-            <h3 className="font-title text-xl sm:text-2xl font-bold mb-4 text-secondary relative inline-block">
+            <h3 className="font-title text-2xl sm:text-3xl font-bold mb-4 text-secondary relative inline-block">
               <span className="relative after:absolute after:bottom-0 after:left-0 after:w-full sm:after:w-1/2 after:h-[2px] after:bg-secondary/30">
                 Connect
               </span>
             </h3>
             <div className="flex flex-row space-x-6 mb-6">
-              <a
-                href="https://facebook.com"
+              <Link
+                href="https://www.facebook.com/profile.php?id=100084896798498&mibextid=zLoPMf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white/10 hover:bg-secondary hover:text-primary rounded-full p-3 transition-all duration-300"
                 aria-label="Facebook"
               >
                 <Facebook size={20} />
-              </a>
-              <a
-                href="https://instagram.com"
+              </Link>
+              <Link
+                href="https://www.instagram.com/m.rose.a.photography"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white/10 hover:bg-secondary hover:text-primary rounded-full p-3 transition-all duration-300"
                 aria-label="Instagram"
               >
                 <Instagram size={20} />
-              </a>
-              <a
-                href="mailto:contact@mariaphotography.com"
+              </Link>
+              <Link
+                href="mailto:m.rose.a.photography@gmail.com"
                 className="bg-white/10 hover:bg-secondary hover:text-primary rounded-full p-3 transition-all duration-300"
                 aria-label="Email"
               >
                 <Mail size={20} />
-              </a>
+              </Link>
             </div>
 
             {/* Mobile-only tagline */}
@@ -118,8 +118,8 @@ const Footer = () => {
       </div>
 
       <div className="bg-black/80 w-full py-4 backdrop-blur-sm">
-        <p className="text-white/90 text-center px-4">
-          © {new Date().getFullYear()} Maria Photography. All rights reserved.
+        <p className="text-white/90 text-center px-4 uppercase">
+          © {new Date().getFullYear()} MRA Photography. All rights reserved.
         </p>
       </div>
     </footer>

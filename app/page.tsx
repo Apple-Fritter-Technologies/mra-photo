@@ -1,21 +1,33 @@
 import Carousel from "@/components/carousel";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="container mx-auto px-4 flex flex-col gap-4">
       <Carousel />
 
+      <Link href="/inquire">
+        <button className="bg-secondary text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-primary hover:text-black transition duration-300 ease-in-out w-fit mx-auto text-xl border border-transparent hover:border-secondary flex items-center group gap-2 mt-2">
+          Inquire Now
+          <ChevronRight
+            className="group-hover:translate-x-1 transition-transform duration-300 ease-in-out"
+            size={20}
+          />
+        </button>
+      </Link>
+
       <div className="flex flex-col items-center">
         <div className="flex flex-col items-center gap-6 my-12">
           <p>MICHIGAN FAMILY PHOTOGRAPHER</p>
-          <h1 className="font-title md:text-6xl text-4xl">
+          <h1 className="font-title md:text-6xl text-4xl font-bold">
             Documenting Life's Precious Moments
           </h1>
           <p className="mt-4">MATERNITY, FAMILY, SENIOR, MILESTONE, & MORE</p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 my-16">
+        <div className="flex flex-col md:flex-row gap-8 md:my-16">
           <Image
             src="/images/home-1.jpg"
             alt="home-1"
@@ -39,7 +51,15 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 my-16">
+        <div className="flex flex-col md:flex-row-reverse gap-8 my-16">
+          <Image
+            src="/images/home-2.jpg"
+            alt="home-1"
+            width={800}
+            height={600}
+            priority
+            className="rounded-lg shadow-lg object-cover w-full md:w-1/2 max-h-[500px]"
+          />{" "}
           <div className="flex flex-col gap-8 items-center w-full md:w-1/2 max-w-lg mx-auto">
             <h2 className="font-title md:text-6xl text-4xl">My Passion</h2>
             <p className="text-lg md:text-xl">
@@ -53,14 +73,6 @@ export default function Home() {
               things will be well worth it and cherished forever.
             </p>
           </div>
-          <Image
-            src="/images/home-2.jpg"
-            alt="home-1"
-            width={800}
-            height={600}
-            priority
-            className="rounded-lg shadow-lg object-cover w-full md:w-1/2 max-h-[500px]"
-          />
         </div>
       </div>
     </div>

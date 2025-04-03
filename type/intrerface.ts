@@ -9,3 +9,8 @@ export interface GalleryModalProps {
   images: ImageItem[];
   initialImageIndex: number;
 }
+
+export interface ImageHeaderProps {
+  img: string;
+  title: string;
+}

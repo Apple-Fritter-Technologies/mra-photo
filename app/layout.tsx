@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import localFont from "next/font/local";
+import { Toaster } from "sonner";
 
 const cormorantInfant = Cormorant_Infant({
   weight: "400",
@@ -84,12 +85,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${cormorantInfant.variable} ${morgana.variable} antialiased`}
       >
         <Navbar />
         <main className="min-h-screen mt-28 md:mt-36">{children}</main>
+        <Toaster theme="light" richColors />
+
         <Footer />
       </body>
     </html>

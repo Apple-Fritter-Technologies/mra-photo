@@ -22,6 +22,7 @@ const Carousel = () => {
     { src: "/images/landscape.jpg", alt: "Portrait photo 4" },
     { src: "/images/child.jpg", alt: "Portrait photo 3" },
     { src: "/images/carousel2.jpg", alt: "Portrait photo 2" },
+    { src: "/images/landscape.jpg", alt: "Portrait photo 4" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(images.length); // Start from the middle set
@@ -221,6 +222,8 @@ const Carousel = () => {
 
   const handleTouchEnd = () => {
     handleDragEnd();
+    // Reset isHovering to false after touch interaction ends
+    setTimeout(() => setIsHovering(false), 50);
   };
 
   // Add drag end event listener to window
@@ -229,12 +232,22 @@ const Carousel = () => {
       if (isDragging) handleDragEnd();
     };
 
+    // Handle touch cancel events that might occur on mobile
+    const handleTouchCancel = () => {
+      if (isDragging) {
+        handleDragEnd();
+        setTimeout(() => setIsHovering(false), 50);
+      }
+    };
+
     window.addEventListener("mouseup", handleWindowMouseUp);
     window.addEventListener("blur", handleWindowMouseUp);
+    window.addEventListener("touchcancel", handleTouchCancel);
 
     return () => {
       window.removeEventListener("mouseup", handleWindowMouseUp);
       window.removeEventListener("blur", handleWindowMouseUp);
+      window.removeEventListener("touchcancel", handleTouchCancel);
     };
   }, [isDragging]);
 

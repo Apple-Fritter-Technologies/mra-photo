@@ -25,3 +25,5 @@ export const navigation = [
     href: "/inquire",
   },
 ];
+
+export const sessionData = ["Lifestyle", "Senior Portrait", "Newborn/Fresh 48"];

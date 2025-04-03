@@ -14,7 +14,7 @@ const Navbar = () => {
   const rightNavigation = navigation.slice(midpoint);
 
   return (
-    <div className="flex justify-center w-full mx-auto items-center px-4 md:pt-8 pt-4 gap-6 fixed top-0 z-10">
+    <div className="flex justify-center w-full mx-auto items-center px-4 md:pt-8 pt-4 gap-6 fixed top-0 z-50">
       <div className="bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-between md:w-fit md:px-6 px-4 md:py-4 py-2 relative z-20 w-full">
         {/* Logo - always visible */}
         <Link

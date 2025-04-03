@@ -172,7 +172,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 border-none rounded-2xl shadow-2xl bg-primary overflow-hidden">
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 border-none rounded-2xl shadow-2xl bg-primary overflow-hidden scale-95">
         <DialogTitle hidden />
         <div className="flex items-center justify-between p-4 border-b border-primary/20">
           <h3 className="text-lg font-medium text-secondary truncate">
@@ -182,7 +182,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
 
         {/* Gallery container with drag support */}
         <div
-          className="relative min-h-[65vh] w-full flex  items-center justify-center p-4 bg-primary/80"
+          className="relative min-h-[65vh] w-full flex items-center justify-center gap-2 p-4 bg-primary/80"
           ref={galleryRef}
         >
           {/* backward button */}
@@ -224,7 +224,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                       className="rounded-lg shadow-lg"
                       style={{
                         maxHeight: "65vh",
-                        maxWidth: "100%",
+                        maxWidth: "98%",
                         width: "auto",
                         height: "auto",
                         objectFit: "contain",
@@ -263,11 +263,11 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
         </div>
 
         {/* Enhanced thumbnail preview with scrolling indicators */}
-        <div className="relative bg-primary px-12 py-4 overflow-hidden">
+        <div className="relative px-12 py-4 overflow-hidden">
           {/* Scroll indicators/controls */}
-          {images.length > 10 && (
+          {images.length > 6 && (
             <>
-              <div className="absolute left-0 top-0 bottom-0 flex items-center">
+              <div className="absolute left-2 top-0 bottom-0 flex items-center">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -284,7 +284,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="absolute right-0 top-0 bottom-0 flex items-center">
+              <div className="absolute right-2 top-0 bottom-0 flex items-center">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -307,7 +307,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
           {/* Thumbnail scroller */}
           <div
             ref={thumbnailContainerRef}
-            className="flex gap-2 overflow-x-auto p-2 items-center justify-center"
+            className="flex gap-2 overflow-x-auto p-2 ps-28 items-center justify-center"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",

@@ -125,3 +125,14 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Webkit scrollbar styles */
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
