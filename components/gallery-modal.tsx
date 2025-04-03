@@ -17,7 +17,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GalleryModalProps } from "@/type/intrerface";
+import { GalleryModalProps } from "@/types/intrerface";
 
 const GalleryModal: React.FC<GalleryModalProps> = ({
   open,

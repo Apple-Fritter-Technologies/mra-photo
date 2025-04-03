@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageHeaderProps } from "@/type/intrerface";
+import { ImageHeaderProps } from "@/types/intrerface";
 import Image from "next/image";
 import React from "react";
 import { motion } from "motion/react";

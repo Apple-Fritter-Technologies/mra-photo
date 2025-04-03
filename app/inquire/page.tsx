@@ -1,7 +1,7 @@
 "use client";
 
 import ImageHeader from "@/components/image-header";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, UserIcon } from "lucide-react";
+import { CalendarIcon, Loader, UserIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { sessionData } from "@/lib/data";
@@ -39,10 +39,10 @@ type FormState = {
   additionalInfo: string;
 };
 
-const InquirePage = () => {
-  const img = "/images/inquire-header.jpg";
-
+// Create a separate component that uses useSearchParams
+function InquireFormWithSearchParams() {
   const searchParams = useSearchParams();
+  const img = "/images/inquire-header.jpg";
 
   const [formState, setFormState] = useState<FormState>({
     fullName: "",
@@ -422,6 +422,15 @@ const InquirePage = () => {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+const InquirePage = () => {
+  return (
+    <Suspense fallback={<Loader className="w-10 h-10 animate-spin" />}>
+      <InquireFormWithSearchParams />
+    </Suspense>
   );
 };
 

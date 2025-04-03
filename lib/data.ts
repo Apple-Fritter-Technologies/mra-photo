@@ -1,4 +1,4 @@
-import { ImageItem } from "@/type/intrerface";
+import { ImageItem } from "@/types/intrerface";
 
 export const navigation = [
   {

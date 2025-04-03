@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import { cn } from "@/lib/utils";
 import GalleryModal from "./gallery-modal";
-import { ImageItem } from "@/type/intrerface";
+import { ImageItem } from "@/types/intrerface";
 
 const Carousel = () => {
   const images: ImageItem[] = [
