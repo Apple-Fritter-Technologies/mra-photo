@@ -88,6 +88,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${cormorantInfant.variable} ${morgana.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Navbar />
         <main className="min-h-screen mt-28 md:mt-36">{children}</main>

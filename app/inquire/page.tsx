@@ -26,6 +26,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { sessionData } from "@/lib/data";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 type FormState = {
   fullName: string;
@@ -41,6 +42,8 @@ type FormState = {
 const InquirePage = () => {
   const img = "/images/inquire-header.jpg";
 
+  const searchParams = useSearchParams();
+
   const [formState, setFormState] = useState<FormState>({
     fullName: "",
     email: "",
@@ -51,6 +54,22 @@ const InquirePage = () => {
     otherReferral: "",
     additionalInfo: "",
   });
+
+  useEffect(() => {
+    const sessionType = searchParams.get("package");
+    if (sessionType) {
+      // Make sure the session type exists in our data
+      const validSessionType = sessionData.find(
+        (session) => session.id === sessionType
+      );
+      if (validSessionType) {
+        setFormState((prev) => ({
+          ...prev,
+          sessionType: sessionType,
+        }));
+      }
+    }
+  }, [searchParams]);
 
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -132,8 +151,8 @@ const InquirePage = () => {
 
       <div className="max-w-5xl mx-auto w-full">
         <p className="text-2xl text-center my-8 font-primary leading-relaxed">
-          Ready to capture your special moments? Fill out this form and let's
-          create
+          Ready to capture your special moments? Fill out this form and
+          let&apos;s create
           <span className="text-secondary font-semibold">
             {" "}
             beautiful memories together!
@@ -226,24 +245,23 @@ const InquirePage = () => {
                     className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2"
                     required
                   >
-                    {sessionData.map((type) => (
+                    {sessionData.map((session) => (
                       <Label
-                        key={type}
+                        key={session.id}
                         className={`flex items-center space-x-2 p-3 rounded-lg transition-all border ${
-                          formState.sessionType ===
-                          type.toLowerCase().replace(/\s+/g, "-")
+                          formState.sessionType === session.id
                             ? "border-secondary bg-secondary/5"
                             : "border-gray-200 hover:border-secondary/30"
                         }`}
-                        htmlFor={type.toLowerCase().replace(/\s+/g, "-")}
+                        htmlFor={session.id}
                       >
                         <RadioGroupItem
-                          value={type.toLowerCase().replace(/\s+/g, "-")}
-                          id={type.toLowerCase().replace(/\s+/g, "-")}
+                          value={session.id}
+                          id={session.id}
                           className="text-secondary"
                           required
                         />
-                        {type}
+                        {session.title}
                       </Label>
                     ))}
                   </RadioGroup>

@@ -106,8 +106,8 @@ const Footer = () => {
 
             <div className="italic max-w-xs w-full text-center sm:text-left bg-white/5 p-4 rounded-lg border-l-2 border-secondary/50">
               <p className=" leading-relaxed">
-                "I have set the LORD always before me; because he is at my right
-                hand, I will not be shaken."
+                &quot;I have set the LORD always before me; because he is at my
+                right hand, I will not be shaken.&quot;
                 <span className="block mt-2 font-semibold text-secondary">
                   Psalm 16:8
                 </span>

@@ -288,7 +288,6 @@ const Carousel = () => {
         </div>
       </div>
 
-      {/* Modal Gallery using improved GalleryModal component */}
       <GalleryModal
         open={modalOpen}
         onOpenChange={setModalOpen}
