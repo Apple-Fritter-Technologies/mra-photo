@@ -27,9 +27,9 @@ const PortfolioPage = () => {
       <PageTitle title="Maria Rose" subtitle="PHOTOGRAPHER" />
 
       <p className="text-center text-gray-600 dark:text-gray-300 max-w-2xl mx-auto -mt-6">
-        Capturing life's precious moments through the lens of creativity and
-        passion. Explore my diverse portfolio showcasing a blend of portraits,
-        landscapes, and artistic photography.
+        Capturing life&apos;s precious moments through the lens of creativity
+        and passion. Explore my diverse portfolio showcasing a blend of
+        portraits, landscapes, and artistic photography.
       </p>
 
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 py-12">

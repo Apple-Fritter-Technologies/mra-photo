@@ -75,7 +75,10 @@ const InquirePage = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Generic update handler for all form fields
-  const updateFormField = (field: keyof FormState, value: any) => {
+  const updateFormField = <T extends keyof FormState>(
+    field: T,
+    value: FormState[T]
+  ) => {
     setFormState((prev) => ({
       ...prev,
       [field]: value,
@@ -92,7 +95,7 @@ const InquirePage = () => {
       sessionType !== "";
 
     setIsFormValid(isValid);
-  }, [formState.fullName, formState.email, formState.sessionType]);
+  }, [formState]);
 
   const resetForm = () => {
     setFormState({
