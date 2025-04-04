@@ -91,7 +91,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Navbar />
-        <main className="min-h-screen mt-28 md:mt-36">{children}</main>
+        <main className="min-h-screen mt-28 md:mt-36 overflow-hidden">
+          {children}
+        </main>
         <Toaster theme="light" richColors />
 
         <Footer />
