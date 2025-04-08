@@ -7,10 +7,6 @@ import { Facebook, Instagram, Mail, ChevronRight } from "lucide-react";
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-b from-primary to-primary/95 pt-12 pb-0 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-32 h-32 bg-secondary/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-xl"></div>
-      <div className="absolute bottom-0 right-0 w-40 h-40 bg-secondary/5 rounded-full translate-x-1/3 translate-y-1/3 blur-xl"></div>
-
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         {/* Mobile logo top center */}
         <div className="md:hidden flex justify-center mb-8">
@@ -23,7 +19,7 @@ const Footer = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 mb-12">
           {/* Logo and tagline - hidden on smallest screens since it's moved to top */}
           <div className="hidden md:flex flex-col items-center md:items-start">
             <Image

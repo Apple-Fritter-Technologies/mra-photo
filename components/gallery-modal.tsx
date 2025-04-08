@@ -43,6 +43,21 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
       const updateViewportHeight = () => {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty("--vh", `${vh}px`);
+
+        // Adjust gallery container height based on available space
+        if (galleryRef.current) {
+          const windowHeight = window.innerHeight;
+          const headerHeight = 56; // Approximate header height
+          const thumbnailHeight = 80; // Approximate thumbnail section height
+          const padding = 32; // Additional padding
+
+          // Calculate available height for the gallery
+          const availableHeight =
+            windowHeight - headerHeight - thumbnailHeight - padding;
+          const minHeight = Math.max(availableHeight, 300); // At least 300px
+
+          galleryRef.current.style.maxHeight = `${minHeight}px`;
+        }
       };
 
       updateViewportHeight();
@@ -301,16 +316,24 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="lg:min-w-5xl md:min-w-3xl w-full max-h-[90vh] p-0 border-none rounded-lg md:rounded-2xl shadow-2xl bg-primary overflow-hidden scale-95 sm:scale-100">
         <DialogTitle hidden />
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-primary/20">
-          <h3 className="text-base sm:text-lg font-medium text-secondary truncate">
+        <div className="flex items-center justify-between p-2 sm:p-3 border-b border-primary/20">
+          <h3 className="text-base font-medium text-secondary truncate">
             {images[modalImageIndex]?.alt || "Image Gallery"}
           </h3>
         </div>
 
-        {/* Gallery container with drag support */}
+        {/* Gallery container with drag support - make it adaptable to viewport height */}
         <div
-          className="relative min-h-[50vh] sm:min-h-[65vh] w-full flex items-center justify-center gap-1 sm:gap-2 p-2 sm:p-4 bg-primary/80"
-          style={open ? { minHeight: "calc(var(--vh, 1vh) * 50)" } : {}}
+          className="relative flex-1 w-full flex items-center justify-center gap-1 sm:gap-2 p-2 bg-primary/80"
+          style={
+            open
+              ? {
+                  height: "auto",
+                  minHeight: "40vh",
+                  maxHeight: "calc(var(--vh, 1vh) * 65)",
+                }
+              : {}
+          }
           ref={galleryRef}
         >
           {/* backward button */}
@@ -438,8 +461,8 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
           </div>
         </div>
 
-        {/* Enhanced thumbnail preview with scrolling indicators */}
-        <div className="relative px-8 sm:px-12 py-2 sm:py-4 overflow-hidden">
+        {/* Enhanced thumbnail preview with scrolling indicators - more compact for small heights */}
+        <div className="relative px-8 py-1 sm:py-2 overflow-hidden">
           {/* Scroll indicators/controls */}
           {images.length > 4 && (
             <>
@@ -480,10 +503,10 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
             </>
           )}
 
-          {/* Thumbnail scroller */}
+          {/* Thumbnail scroller - more compact for small heights */}
           <div
             ref={thumbnailContainerRef}
-            className="flex gap-1 sm:gap-2 overflow-x-auto p-1 sm:p-2 ps-8 sm:ps-28 items-center justify-center"
+            className="flex gap-1 sm:gap-2 overflow-x-auto p-1 ps-8 sm:ps-28 items-center justify-center"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -493,7 +516,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
               <button
                 key={`thumb-${i}`}
                 className={cn(
-                  "relative rounded-md overflow-hidden transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary w-10 h-14 sm:w-14 sm:h-20 flex-shrink-0",
+                  "relative rounded-md overflow-hidden transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary w-8 h-12 sm:w-12 sm:h-16 lg:w-14 lg:h-20 flex-shrink-0",
                   modalImageIndex === i
                     ? "ring-2 ring-secondary scale-105 shadow-md"
                     : "opacity-70 hover:opacity-100"
