@@ -55,13 +55,13 @@ const PortfolioPage = () => {
             >
               <Image
                 src={image.src}
-                alt={image.alt}
+                alt={image.alt || ""}
                 width={600}
                 height={600}
                 priority={index < 4}
                 className="w-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300">
                 <span className="text-lg font-medium tracking-wide">
                   {image.alt}

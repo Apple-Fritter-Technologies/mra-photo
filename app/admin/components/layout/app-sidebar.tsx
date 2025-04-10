@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/lib/common";
-import { navItems } from "@/lib/data";
+import { adminNavItems } from "@/lib/data";
 
 interface NavItemProps {
   href: string;
@@ -125,7 +125,7 @@ const AppSidebar = () => {
         </Button>
       </div>
       <nav className={cn("flex flex-1 flex-col gap-1 p-2 overflow-y-auto")}>
-        {navItems.map((item, index) => (
+        {adminNavItems.map((item, index) => (
           <NavItem
             key={index}
             href={item.href}

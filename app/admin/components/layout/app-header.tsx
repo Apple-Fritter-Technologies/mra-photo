@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { userLogout } from "@/lib/common";
 
 const AppHeader = () => {
   return (
@@ -40,7 +41,7 @@ const AppHeader = () => {
               <p className="font-medium">Admin User</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={userLogout}>
               <Power className="h-5 w-5 text-destructive" />
               <span>Log out</span>
             </DropdownMenuItem>

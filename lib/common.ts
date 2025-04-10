@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { removeSessionToken } from "./server-service";
+import { toast } from "sonner";
 
 export function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
@@ -23,3 +25,16 @@ export function useMediaQuery(query: string) {
 
   return matches;
 }
+
+export const userLogout = async () => {
+  localStorage.removeItem("token");
+
+  const res = await removeSessionToken();
+  if (!res) {
+    toast.error("Failed to logout");
+    return;
+  }
+
+  toast.success("Logged out successfully");
+  window.location.href = "/";
+};

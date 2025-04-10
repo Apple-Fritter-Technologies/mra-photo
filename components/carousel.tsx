@@ -141,7 +141,7 @@ const Carousel = () => {
           <div className="overflow-hidden rounded-lg group shadow-md h-[500px] w-[300px]">
             <Image
               src={img.src}
-              alt={img.alt}
+              alt={img.alt || "Carousel image"}
               width={300}
               height={500}
               className="object-cover w-full h-full rounded-lg cursor-pointer group-hover:scale-105 transition-all duration-300"

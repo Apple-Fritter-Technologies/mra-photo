@@ -29,6 +29,29 @@ export const navigation = [
   },
 ];
 
+export const adminNavItems = [
+  {
+    href: "/admin/dashboard",
+    icon: Home,
+    label: "Dashboard",
+  },
+  {
+    href: "/admin/dashboard/portfolio",
+    icon: Image,
+    label: "Portfolio",
+  },
+  {
+    href: "/admin/dashboard/products",
+    icon: Box,
+    label: "Products",
+  },
+  {
+    href: "/admin/dashboard/bookings",
+    icon: Calendar,
+    label: "Bookings",
+  },
+];
+
 export const sessionData = [
   {
     id: "lifestyle",
@@ -79,27 +102,4 @@ export const portfolioImages: ImageItem[] = [
   { src: "/images/child.jpg", alt: "Portfolio image 14" },
   { src: "/images/inquire-header.jpg", alt: "Portfolio image 15" },
   { src: "/images/logo.png", alt: "Portfolio image 16" },
-];
-
-export const navItems = [
-  {
-    href: "/admin/dashboard",
-    icon: Home,
-    label: "Dashboard",
-  },
-  {
-    href: "/admin/dashboard/portfolio",
-    icon: Image,
-    label: "Portfolio",
-  },
-  {
-    href: "/admin/dashboard/products",
-    icon: Box,
-    label: "Products",
-  },
-  {
-    href: "/admin/dashboard/bookings",
-    icon: Calendar,
-    label: "Bookings",
-  },
 ];

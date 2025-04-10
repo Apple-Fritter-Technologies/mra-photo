@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -14,9 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertTriangle, Mail, Lock, Camera } from "lucide-react";
+import { loginUser, verifyUserToken } from "@/lib/actions/user-action";
+import { toast } from "sonner";
+import { useLocalStorage } from "usehooks-ts";
 
 const DashboardLoginPage = () => {
   const router = useRouter();
@@ -24,27 +25,88 @@ const DashboardLoginPage = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+
+  const [token, setToken, removeToken] = useLocalStorage("token", "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(false);
 
-    try {
-      // Replace this with your actual authentication logic
-      // For example, call your API endpoint for login
-      console.log("Logging in with:", email, password);
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      setIsLoading(false);
+      return;
+    }
 
-      // Mock successful login
-      setTimeout(() => {
+    try {
+      const res = await loginUser({ email, password });
+
+      if (res.error) {
+        setError(true);
+        toast.error("Invalid email or password");
+      } else {
+        setToken(res.token);
+        toast.success("Login successful!");
         router.push("/admin/dashboard");
-      }, 1500);
+      }
     } catch (err) {
       setError(true);
+      toast.error("An error occurred while logging in", {
+        description: "Please check your credentials and try again.",
+        duration: 3000,
+      });
+      console.error("Login failed:", err);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const checkAuthStatus = async () => {
+    setIsCheckingAuth(true);
+
+    if (token) {
+      try {
+        const res = await verifyUserToken(token);
+
+        if (res.authorized) {
+          router.push("/admin/dashboard");
+          return;
+        } else {
+          removeToken();
+
+          if (res.error) {
+            toast.error("Session expired", {
+              description: res.error,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Token verification error:", error);
+        toast.error("Token verification failed. Please log in again.");
+        removeToken();
+      }
+    }
+    setIsCheckingAuth(false);
+  };
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-slate-500 dark:text-slate-400">
+            Checking authentication...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -108,12 +170,6 @@ const DashboardLoginPage = () => {
                   <Label htmlFor="password" className="text-sm font-medium">
                     Password
                   </Label>
-                  <Link
-                    href="#"
-                    className="text-sm text-primary hover:underline font-medium"
-                  >
-                    Forgot password?
-                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -129,16 +185,6 @@ const DashboardLoginPage = () => {
                     disabled={isLoading}
                   />
                 </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
-                <label
-                  htmlFor="remember"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Remember me
-                </label>
               </div>
 
               <Button
