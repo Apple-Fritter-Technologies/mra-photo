@@ -379,7 +379,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                         imageRefs.current[i] = el;
                       }}
                       src={img.src}
-                      alt={img.alt}
+                      alt={img.alt || "Gallery image"}
                       width={800}
                       height={1200}
                       className="rounded-lg shadow-lg object-contain w-full h-full max-w-[98%] max-h-[98%] transition-transform duration-300 ease-in-out"
