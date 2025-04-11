@@ -27,7 +27,7 @@ model Portfolio {
 model Product {
   id          String   @id @default(cuid())
   title       String   @unique
-  price       Int
+  price       Float
   description String?
   duration    String
   photos      String

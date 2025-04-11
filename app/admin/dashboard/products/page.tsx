@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Product } from "@/types/intrerface";
@@ -55,29 +55,9 @@ const ProductsPage = () => {
     setOpen(true);
   };
 
-  const handleDeleteProduct = async (productId: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        // Replace with actual API call
-        const response = await fetch(`/api/products/${productId}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) {
-          toast.error("Failed to delete product");
-        } else {
-          toast.success("Product deleted successfully");
-          fetchProducts(); // Refresh the products list
-        }
-      } catch (error) {
-        toast.error("An error occurred while deleting the product");
-      }
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 space-y-4">
-      <div className="flex justify-between items-center sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border border-white/10 p-4">
+      <div className="flex justify-between flex-wrap gap-4 items-center sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border border-white/10 p-4">
         <h1 className="text-2xl font-bold">Product Management</h1>
         <Button
           onClick={handleAddNewProduct}
@@ -95,9 +75,11 @@ const ProductsPage = () => {
               id: "",
               title: "",
               description: "",
-              price: "",
-              image: "",
-              category: "",
+              price: 0,
+              image_url: "",
+              duration: "",
+              photos: "",
+              cta: "",
             }
           }
           refreshProducts={fetchProducts}
@@ -139,62 +121,69 @@ const ProductsPage = () => {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
+        <div className="flex flex-wrap gap-4">
           {products.map((product) => (
             <div
               key={product.id}
-              className="group relative overflow-hidden rounded-lg border shadow-md transition-all hover:shadow-lg bg-white"
+              className="group relative rounded-lg w-full h-full max-w-[389px] shadow-md border border-white/10 bg-background/50 transition-all duration-300 ease-in-out overflow-hidden"
             >
               <div className="relative h-64 overflow-hidden">
                 <Image
-                  src={product.image}
+                  src={product.image_url}
                   alt={product.title}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="text-white text-xl font-semibold px-4 py-2 rounded-lg bg-black/40 backdrop-blur-sm">
+                    {product.title}
+                  </span>
+                </div>
               </div>
 
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-semibold truncate">
+              <div className="p-6 flex flex-col gap-4 h-full">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-2xl font-semibold truncate">
                     {product.title}
                   </h3>
-                  <span className="text-lg font-bold text-secondary">
+                  <span className="text-xl font-bold text-secondary whitespace-nowrap">
                     ${product.price}
                   </span>
                 </div>
 
-                <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                  {product.description}
+                <p className="text-gray-600 overflow-hidden break-all">
+                  {product?.description?.length > 100
+                    ? product.description.slice(0, 100) + "..."
+                    : product.description}
                 </p>
 
-                <div className="flex items-center">
-                  <span className="text-xs px-2 py-1 bg-secondary/10 text-secondary rounded-full">
-                    {product.category}
+                <div className="flex justify-between font-medium text-gray-500">
+                  <span className="flex items-center gap-1">
+                    {product.photos}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-secondary"></span>
+                    {product.duration}
                   </span>
                 </div>
-              </div>
 
-              <div className="absolute top-2 right-2 flex gap-2">
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleEditProduct(product)}
-                >
-                  <Pencil size={16} />
-                </Button>
+                {/* cta button */}
+                <div className="mt-auto w-full bg-secondary text-white font-bold py-3 text-center rounded-md group-hover:bg-primary group-hover:text-black transition-all duration-300 ease-in-out text-xl border border-transparent group-hover:border-secondary flex items-center justify-center gap-2 relative overflow-hidden">
+                  <span className="relative z-10 inline-flex items-center gap-2 transform transition-transform duration-300 group-hover:translate-x-0">
+                    {product.cta}
+                  </span>
+                </div>
 
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDeleteProduct(product.id)}
-                >
-                  <Trash2 size={16} />
-                </Button>
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <Button
+                    size="icon"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleEditProduct(product)}
+                  >
+                    <Pencil size={16} />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

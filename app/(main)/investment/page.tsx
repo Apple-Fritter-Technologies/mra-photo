@@ -50,7 +50,7 @@ const InvestmentPage = () => {
                 </span>
               </div>
 
-              <p className="text-gray-600">{pkg.description}</p>
+              <p className="text-gray-600 break-all">{pkg.description}</p>
 
               <div className="flex justify-between font-medium text-gray-500">
                 <span className="flex items-center gap-1">

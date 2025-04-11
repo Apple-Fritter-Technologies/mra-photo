@@ -92,6 +92,7 @@ const PortfolioModal = ({
     setSubmitting(true);
     try {
       const res = await addPortfolioImage({
+        id: image.id,
         url: image.url,
         title: image.title || "Portfolio",
       });

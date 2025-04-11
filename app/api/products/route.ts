@@ -65,7 +65,9 @@ export async function POST(req: NextRequest) {
 
     if (existingProduct) {
       return NextResponse.json(
-        { error: "This product already exists" },
+        {
+          error: "The product already exists. Please choose a different title!",
+        },
         { status: 400 }
       );
     }
@@ -127,14 +129,13 @@ export async function PUT(req: NextRequest) {
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
-        title: body.title !== undefined ? body.title : undefined,
-        price: body.price !== undefined ? body.price : undefined,
-        description:
-          body.description !== undefined ? body.description : undefined,
-        duration: body.duration !== undefined ? body.duration : undefined,
-        photos: body.photos !== undefined ? body.photos : undefined,
-        image_url: body.image_url !== undefined ? body.image_url : undefined,
-        cta: body.cta !== undefined ? body.cta : "Book Now",
+        title: body.title,
+        price: body.price,
+        description: body.description,
+        duration: body.duration,
+        photos: body.photos,
+        image_url: body.image_url,
+        cta: body.cta || "Book Now",
       },
     });
 

@@ -30,7 +30,9 @@ export interface Product {
   id: string;
   title: string;
   description: string;
-  price: string;
-  image: string;
-  category: string;
+  price: number;
+  image_url: string;
+  duration: string;
+  photos: string;
+  cta?: string;
 }

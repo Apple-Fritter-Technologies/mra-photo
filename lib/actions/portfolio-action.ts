@@ -3,6 +3,7 @@
 import axios from "axios";
 import { getSessionToken } from "../server-service";
 import { ApiUrl } from "../utils";
+import { PortfolioImage } from "@/types/intrerface";
 
 export const fetchPortfolioImages = async () => {
   try {
@@ -17,10 +18,7 @@ export const fetchPortfolioImages = async () => {
   }
 };
 
-export const addPortfolioImage = async (image: {
-  url: string;
-  title: string;
-}) => {
+export const addPortfolioImage = async (image: PortfolioImage) => {
   const sessionToken = await getSessionToken();
   if (!sessionToken) {
     return { error: "No token found. Please login again." };
