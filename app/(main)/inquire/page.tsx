@@ -1,7 +1,7 @@
 "use client";
 
 import ImageHeader from "@/components/image-header";
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, FormEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -110,7 +110,7 @@ function InquireFormWithSearchParams() {
     });
   };
 
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isFormValid) {

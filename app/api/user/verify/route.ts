@@ -13,19 +13,24 @@ export async function POST(req: Request) {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+      const decoded = (await jwt.verify(
+        token,
+        process.env.JWT_SECRET as string
+      )) as { userId: string; email: string };
+
       // Don't return the full user data for security reasons
       return NextResponse.json(
         {
           authorized: true,
           user: {
-            userId: (decoded as any).userId,
-            email: (decoded as any).email,
+            userId: decoded.userId,
+            email: decoded.email,
           },
         },
         { status: 200 }
       );
     } catch (error) {
+      console.error("Token verification error:", error);
       return NextResponse.json(
         { authorized: false, error: "Invalid or expired token" },
         { status: 401 }

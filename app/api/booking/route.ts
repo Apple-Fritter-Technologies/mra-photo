@@ -167,22 +167,19 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    // Prepare update data
-    const updateData: any = {};
-
-    if (name !== undefined) updateData.name = name;
-    if (email !== undefined) updateData.email = email;
-    if (date !== undefined) updateData.date = new Date(date);
-    if (time !== undefined) updateData.time = time;
-    if (product_id !== undefined) updateData.product_id = product_id;
-    if (session_name !== undefined) updateData.session_name = session_name;
-    if (heard_from !== undefined) updateData.heard_from = heard_from;
-    if (message !== undefined) updateData.message = message;
-
     // Update booking
     const updatedBooking = await prisma.booking.update({
       where: { id },
-      data: updateData,
+      data: {
+        name,
+        email,
+        date,
+        time,
+        product_id,
+        session_name,
+        heard_from,
+        message,
+      },
       include: { product: true },
     });
 

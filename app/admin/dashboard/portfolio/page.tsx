@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
-import Image from "next/image";
-import { Loader2, Pencil } from "lucide-react";
-import { toast } from "sonner";
 import { fetchPortfolioImages } from "@/lib/actions/portfolio-action";
-import PortfolioModal from "../../components/portfolio-modal";
 import { PortfolioImage } from "@/types/intrerface";
+import { Loader2, Pencil } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
+import PortfolioModal from "../../components/portfolio-modal";
 
 // Interfaces for portfolio data
 
@@ -31,7 +31,8 @@ const PortfolioPage = () => {
       } else {
         setImages(res);
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error fetching portfolio images:", error);
       setError(true);
       toast.error("Failed to fetch portfolio images");
     } finally {
