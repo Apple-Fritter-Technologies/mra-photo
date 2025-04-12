@@ -1,16 +1,19 @@
 import { Product } from "@/types/intrerface";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { getSessionToken } from "../server-service";
 
 export const getProducts = async () => {
   try {
     const res = await axios.get(`/api/products`);
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error fetching products:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to fetch products",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error: error.response?.data?.error || "Failed to fetch products",
+      };
+    }
+    return { error: "Failed to fetch products" };
   }
 };
 
@@ -26,11 +29,14 @@ export const addProduct = async (product: Product) => {
     });
 
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error adding product:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to add product",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error: error.response?.data?.error || "Failed to add product",
+      };
+    }
+    return { error: "Failed to add product" };
   }
 };
 
@@ -46,11 +52,14 @@ export const updateProduct = async (product: Product) => {
     });
 
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error updating product:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to update product",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error: error.response?.data?.error || "Failed to update product",
+      };
+    }
+    return { error: "Failed to update product" };
   }
 };
 
@@ -66,10 +75,13 @@ export const deleteProduct = async (id: string) => {
     });
 
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error deleting product:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to delete product",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error: error.response?.data?.error || "Failed to delete product",
+      };
+    }
+    return { error: "Failed to delete product" };
   }
 };

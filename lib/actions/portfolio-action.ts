@@ -1,6 +1,6 @@
 "use server";
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { getSessionToken } from "../server-service";
 import { ApiUrl } from "../utils";
 import { PortfolioImage } from "@/types/intrerface";
@@ -10,11 +10,15 @@ export const fetchPortfolioImages = async () => {
     const res = await axios.get(`${ApiUrl}/api/portfolio`);
 
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error fetching portfolio images:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to fetch portfolio images",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error:
+          error.response?.data?.error || "Failed to fetch portfolio images",
+      };
+    }
+    return { error: "Failed to fetch portfolio images" };
   }
 };
 
@@ -30,11 +34,14 @@ export const addPortfolioImage = async (image: PortfolioImage) => {
     });
 
     return res.data;
-  } catch (error: any) {
-    console.log("Error adding portfolio image:", error?.response?.data?.error);
-    return {
-      error: error?.response?.data?.error || "Failed to add portfolio image",
-    };
+  } catch (error: AxiosError | unknown) {
+    if (axios.isAxiosError(error)) {
+      console.log("Error adding portfolio image:", error.response?.data?.error);
+      return {
+        error: error.response?.data?.error || "Failed to add portfolio image",
+      };
+    }
+    return { error: "Failed to add portfolio image" };
   }
 };
 
@@ -50,11 +57,15 @@ export const deletePortfolioImage = async (id: string) => {
     });
 
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error deleting portfolio image:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to delete portfolio image",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error:
+          error.response?.data?.error || "Failed to delete portfolio image",
+      };
+    }
+    return { error: "Failed to delete portfolio image" };
   }
 };
 
@@ -73,10 +84,14 @@ export const updatePortfolioImage = async (
     });
 
     return res.data;
-  } catch (error: any) {
+  } catch (error: AxiosError | unknown) {
     console.error("Error updating portfolio image:", error);
-    return {
-      error: error?.response?.data?.error || "Failed to update portfolio image",
-    };
+    if (axios.isAxiosError(error)) {
+      return {
+        error:
+          error.response?.data?.error || "Failed to update portfolio image",
+      };
+    }
+    return { error: "Failed to update portfolio image" };
   }
 };

@@ -8,48 +8,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  password   String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
-
-model Portfolio {
-  id         String   @id @default(cuid())
-  url        String   @unique
-  title      String?  @default("Portfolio")
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
-
-model Product {
-  id          String   @id @default(cuid())
-  title       String   @unique
-  price       Float
-  description String?
-  duration    String
-  photos      String
-  image_url   String
-  cta         String?  @default("Book Now")
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  Booking Booking[]
-}
-
 model Booking {
-  id           String   @id @default(cuid())
+  id           String   @id
   name         String
   email        String
   date         DateTime
   time         String
-  product      Product? @relation(fields: [product_id], references: [id])
   product_id   String?
   session_name String?
   heard_from   String?
   message      String?
   created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  updated_at   DateTime
+  Product      Product? @relation(fields: [product_id], references: [id])
+}
+
+model Portfolio {
+  id         String   @id
+  url        String   @unique
+  title      String?  @default("Portfolio")
+  created_at DateTime @default(now())
+  updated_at DateTime
+}
+
+model Product {
+  id          String    @id
+  title       String    @unique
+  price       Float
+  description String?
+  duration    String
+  photos      String
+  image_url   String
+  cta         String?   @default("Book Now")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime
+  Booking     Booking[]
+}
+
+model User {
+  id         String   @id
+  email      String   @unique
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime
 }

@@ -46,7 +46,10 @@ export async function POST(req: Request) {
     );
 
     // Remove password from user object
-    const { password: _password, ...userWithoutPassword } = user;
+    const userWithoutPassword = {
+      id: user.id,
+      email: user.email,
+    };
 
     // Create response with token in body (not in cookie)
     return NextResponse.json(
