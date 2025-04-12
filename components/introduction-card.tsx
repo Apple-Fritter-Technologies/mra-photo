@@ -28,7 +28,7 @@ const IntroductionCard = ({
     setModalOpen(true);
   };
 
-  const images = [{ src: imageUrl, alt: title }];
+  const images = [{ id: "99", url: imageUrl, title: title }];
 
   // Animation variants
   const imageAnimationVariant = {
