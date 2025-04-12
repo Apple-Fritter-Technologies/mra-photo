@@ -31,3 +31,17 @@ export interface Product {
   photos: string;
   cta?: string;
 }
+
+export interface Booking {
+  id: string;
+  name: string;
+  email: string;
+  date: Date;
+  time: string;
+  status: string;
+  product_id: string;
+  session_name?: string;
+  heard_from?: string;
+  message?: string;
+  created_at?: string;
+}

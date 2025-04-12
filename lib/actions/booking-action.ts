@@ -3,6 +3,7 @@
 import axios from "axios";
 import { getSessionToken } from "../server-service";
 import { ApiUrl } from "../utils";
+import { Booking } from "@/types/intrerface";
 
 export const fetchBookings = async () => {
   const sessionToken = await getSessionToken();
@@ -27,32 +28,14 @@ export const fetchBookings = async () => {
   }
 };
 
-export const createBooking = async (booking: any) => {
+export const createBooking = async (booking: Booking) => {
   const sessionToken = await getSessionToken();
   if (!sessionToken) {
     return { error: "No token found. Please login again." };
   }
 
   try {
-    // Map form fields to API expected fields
-    const apiBooking = {
-      name: booking.fullName,
-      email: booking.email,
-      date: booking.date || new Date(),
-      time: booking.preferredTime || "Any time",
-      session_name: booking.sessionType,
-      heard_from: booking.referralSource,
-      message: booking.additionalInfo || "",
-      // If otherReferral is provided and referralSource is 'other', add it to message
-      ...(booking.otherReferral &&
-        booking.referralSource === "other" && {
-          message: `${booking.additionalInfo || ""}\n\nReferral Source: ${
-            booking.otherReferral
-          }`,
-        }),
-    };
-
-    const res = await axios.post(`${ApiUrl}/api/booking`, apiBooking, {
+    const res = await axios.post(`${ApiUrl}/api/booking`, booking, {
       headers: { Authorization: `Bearer ${sessionToken}` },
     });
 
@@ -68,7 +51,10 @@ export const createBooking = async (booking: any) => {
   }
 };
 
-export const updateBooking = async (booking: any) => {
+export const updateBooking = async (booking: {
+  id: string;
+  status: string;
+}) => {
   const sessionToken = await getSessionToken();
   if (!sessionToken) {
     return { error: "No token found. Please login again." };

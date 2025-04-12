@@ -24,11 +24,14 @@ import { updateBooking, deleteBooking } from "@/lib/actions/booking-action";
 import { format } from "date-fns";
 import { BookingStatusOptions } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { Booking } from "@/types/intrerface";
+
+// Define a proper Booking interface
 
 interface BookingModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  bookingData: any;
+  bookingData: Booking;
   refreshBookings: () => Promise<void>;
 }
 
@@ -39,11 +42,11 @@ const BookingModal = ({
   refreshBookings,
 }: BookingModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [booking, setBooking] = useState<any>({
+  const [booking, setBooking] = useState<Booking>({
     id: "",
     name: "",
     email: "",
-    date: "",
+    date: new Date(),
     time: "",
     status: "pending",
     product_id: "",
@@ -56,9 +59,7 @@ const BookingModal = ({
     if (open && bookingData) {
       setBooking({
         ...bookingData,
-        date: bookingData.date
-          ? format(new Date(bookingData.date), "yyyy-MM-dd")
-          : "",
+        date: bookingData.date ? new Date(bookingData.date) : new Date(),
       });
     }
   }, [open, bookingData]);
@@ -124,11 +125,13 @@ const BookingModal = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (date: Date | string) => {
     try {
-      return format(new Date(dateString), "MMMM d, yyyy");
-    } catch (error) {
-      return dateString;
+      const dateObject = date instanceof Date ? date : new Date(date);
+      return format(dateObject, "MMMM d, yyyy");
+    } catch (error: unknown) {
+      console.error("Error formatting date:", error);
+      return String(date);
     }
   };
 

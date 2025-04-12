@@ -10,8 +10,17 @@ import { Input } from "@/components/ui/input";
 
 import BookingModal from "../../components/booking-modal";
 import { fetchBookings } from "@/lib/actions/booking-action";
+import { Booking } from "@/types/intrerface";
 
-const statusColors = {
+// Define status colors with proper typing
+type StatusColorMap = {
+  pending: string;
+  confirmed: string;
+  completed: string;
+  cancelled: string;
+};
+
+const statusColors: StatusColorMap = {
   pending: "bg-yellow-200 text-yellow-800",
   confirmed: "bg-green-200 text-green-800",
   completed: "bg-blue-200 text-blue-800",
@@ -19,11 +28,11 @@ const statusColors = {
 };
 
 const BookingsPage = () => {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
-  const [currentBooking, setCurrentBooking] = useState<any>(null);
+  const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -54,7 +63,7 @@ const BookingsPage = () => {
     try {
       await getBookings();
       toast.success("Bookings refreshed");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error refreshing bookings:", error);
     } finally {
       setRefreshing(false);
@@ -66,7 +75,7 @@ const BookingsPage = () => {
   }, []);
 
   // Handle viewing booking details
-  const handleViewBooking = (booking: any) => {
+  const handleViewBooking = (booking: Booking) => {
     setCurrentBooking(booking);
     setOpen(true);
   };
@@ -84,10 +93,14 @@ const BookingsPage = () => {
   });
 
   // Format date for display
-  const formatBookingDate = (dateString: string) => {
+  const formatBookingDate = (dateString: string | Date) => {
     try {
-      return format(new Date(dateString), "MMM d, yyyy");
-    } catch (error) {
+      return format(
+        typeof dateString === "string" ? new Date(dateString) : dateString,
+        "MMM d, yyyy"
+      );
+    } catch (error: unknown) {
+      console.error("Error formatting date:", error);
       return "Invalid date";
     }
   };
@@ -122,7 +135,7 @@ const BookingsPage = () => {
         <BookingModal
           open={open}
           setOpen={setOpen}
-          bookingData={currentBooking || {}}
+          bookingData={currentBooking || ({} as Booking)}
           refreshBookings={getBookings}
         />
       </div>

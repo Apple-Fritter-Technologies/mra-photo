@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { createBooking } from "@/lib/actions/booking-action";
-import { Product } from "@/types/intrerface";
+import { Booking, Product } from "@/types/intrerface";
 import { getProducts } from "@/lib/actions/product-action";
 
 type FormState = {
@@ -143,9 +143,41 @@ function InquireFormWithSearchParams() {
 
     setIsSubmitting(true);
     try {
-      const submissionData = {
-        ...formState,
-        preferredDate: formState.date ? format(formState.date, "PPP") : null,
+      // const apiBooking = {
+      //   name: booking.fullName,
+      //   email: booking.email,
+      //   date: booking.date || new Date(),
+      //   time: booking.preferredTime || "Any time",
+      //   session_name: booking.sessionType,
+      //   heard_from: booking.referralSource,
+      //   message: booking.additionalInfo || "",
+      //   // If otherReferral is provided and referralSource is 'other', add it to message
+      //   ...(booking.otherReferral &&
+      //     booking.referralSource === "other" && {
+      //       message: `${booking.additionalInfo || ""}\n\nReferral Source: ${
+      //         booking.otherReferral
+      //       }`,
+      //     }),
+      // };
+
+      const submissionData: Booking = {
+        id: formState.sessionId,
+        name: formState.fullName,
+        email: formState.email,
+        session_name: formState.sessionType,
+        product_id: formState.sessionId,
+        status: "pending",
+        date: formState.date || new Date(),
+        time: formState.preferredTime || "Any time",
+        heard_from: formState.referralSource,
+        message: formState.additionalInfo,
+        // If otherReferral is provided and referralSource is 'other', add it to message
+        ...(formState.otherReferral &&
+          formState.referralSource === "other" && {
+            message: `${formState.additionalInfo || ""}\n\nReferral Source: ${
+              formState.otherReferral
+            }`,
+          }),
       };
 
       const res = await createBooking(submissionData);
