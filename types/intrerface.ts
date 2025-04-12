@@ -6,7 +6,7 @@ export interface ImageItem {
 export interface GalleryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  images: ImageItem[];
+  images: PortfolioImage[];
   initialImageIndex: number;
 }
 

@@ -330,7 +330,10 @@ const ProductModal = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <div className="flex items-center flex-wrap gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <p className="text-xs text-gray-500">(Optional)</p>
+                </div>
                 <Textarea
                   id="description"
                   placeholder="Enter product description"
@@ -343,7 +346,10 @@ const ProductModal = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cta">Call to Action Text</Label>
+                <div className="flex items-center flex-wrap gap-2">
+                  <Label htmlFor="cta">Call to Action Text</Label>
+                  <p className="text-xs text-gray-500">(Optional)</p>
+                </div>
                 <Input
                   id="cta"
                   placeholder="e.g. Book Now"

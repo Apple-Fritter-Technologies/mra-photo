@@ -1,7 +1,7 @@
 "use server";
 
 import { User } from "@/types/intrerface";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { ApiUrl } from "../utils";
 import { cookies } from "next/headers";
 
@@ -26,7 +26,7 @@ export const loginUser = async ({ email, password }: User) => {
     });
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error logging in:", error);
     if (axios.isAxiosError(error)) {
       return {
@@ -47,7 +47,7 @@ export const verifyUserToken = async (token: string) => {
       token,
     });
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error verifying token:", error);
     if (axios.isAxiosError(error)) {
       return {

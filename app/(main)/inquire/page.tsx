@@ -21,17 +21,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Loader, UserIcon } from "lucide-react";
+import { CalendarIcon, Loader2, UserIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { sessionData } from "@/lib/data";
+
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
+import { createBooking } from "@/lib/actions/booking-action";
+import { Product } from "@/types/intrerface";
+import { getProducts } from "@/lib/actions/product-action";
 
 type FormState = {
   fullName: string;
   email: string;
-  sessionType: string;
+  sessionType: string; // Will now store the session title
+  sessionId: string; // Added to store the session ID
   date?: Date;
   preferredTime: string;
   referralSource: string;
@@ -39,113 +43,142 @@ type FormState = {
   additionalInfo: string;
 };
 
-// Create a separate component that uses useSearchParams
+// Initial form state
+const initialFormState: FormState = {
+  fullName: "",
+  email: "",
+  sessionType: "",
+  sessionId: "",
+  date: undefined,
+  preferredTime: "",
+  referralSource: "",
+  otherReferral: "",
+  additionalInfo: "",
+};
+
 function InquireFormWithSearchParams() {
   const searchParams = useSearchParams();
   const img = "/images/inquire-header.jpg";
 
-  const [formState, setFormState] = useState<FormState>({
-    fullName: "",
-    email: "",
-    sessionType: "lifestyle",
-    date: undefined,
-    preferredTime: "",
-    referralSource: "",
-    otherReferral: "",
-    additionalInfo: "",
-  });
-
-  useEffect(() => {
-    const sessionType = searchParams.get("package");
-    if (sessionType) {
-      // Make sure the session type exists in our data
-      const validSessionType = sessionData.find(
-        (session) => session.id === sessionType
-      );
-      if (validSessionType) {
-        setFormState((prev) => ({
-          ...prev,
-          sessionType: sessionType,
-        }));
-      }
-    }
-  }, [searchParams]);
-
+  const [sessionData, setSessionData] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [formState, setFormState] = useState<FormState>(initialFormState);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Fetch sessions once on component mount
+  const fetchSessions = async () => {
+    setLoading(true);
+    try {
+      const res = await getProducts();
+
+      if (res.error) {
+        setError(true);
+        toast.error("Error loading session types");
+      } else {
+        setSessionData(res);
+
+        // Set default session with title instead of just ID
+        if (res.length > 0) {
+          const defaultSession = res[0];
+          setFormState((prev) => ({
+            ...prev,
+            sessionType: defaultSession.title,
+            sessionId: defaultSession.id, // Store ID separately for verification
+          }));
+
+          // Apply session from URL query param if available
+          const sessionFromUrl = searchParams.get("package");
+          if (sessionFromUrl) {
+            const matchedSession = res.find(
+              (s: { id: string }) => s.id === sessionFromUrl
+            );
+            if (matchedSession) {
+              setFormState((prev) => ({
+                ...prev,
+                sessionType: matchedSession.title,
+                sessionId: matchedSession.id,
+              }));
+            }
+          }
+        }
+      }
+    } catch (error: unknown) {
+      console.error("Failed to fetch sessions:", error);
+      setError(true);
+      toast.error("Couldn't load session types");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, [searchParams]);
 
   // Generic update handler for all form fields
   const updateFormField = <T extends keyof FormState>(
     field: T,
     value: FormState[T]
   ) => {
-    setFormState((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
   // Validate form whenever required fields change
   useEffect(() => {
-    const { fullName, email, sessionType } = formState;
-    const isValid =
+    const { fullName, email, sessionId } = formState;
+    setIsFormValid(
       fullName.trim() !== "" &&
-      email.trim() !== "" &&
-      /^\S+@\S+\.\S+$/.test(email) &&
-      sessionType !== "";
-
-    setIsFormValid(isValid);
-  }, [formState]);
-
-  const resetForm = () => {
-    setFormState({
-      fullName: "",
-      email: "",
-      sessionType: "lifestyle",
-      date: undefined,
-      preferredTime: "",
-      referralSource: "",
-      otherReferral: "",
-      additionalInfo: "",
-    });
-  };
+        email.trim() !== "" &&
+        /^\S+@\S+\.\S+$/.test(email) &&
+        sessionId !== ""
+    );
+  }, [formState.fullName, formState.email, formState.sessionId]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isFormValid) {
-      setIsSubmitting(true);
+    if (!isFormValid) return;
 
-      try {
-        // Format data for submission
-        const submissionData = {
-          ...formState,
-          preferredDate: formState.date ? format(formState.date, "PPP") : null,
-        };
+    setIsSubmitting(true);
+    try {
+      const submissionData = {
+        ...formState,
+        preferredDate: formState.date ? format(formState.date, "PPP") : null,
+      };
 
-        // Log form data to console
-        console.log("Form submitted with data:", submissionData);
+      const res = await createBooking(submissionData);
 
-        // Simulate API call with timeout
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Show success toast
-        toast.success("Form submitted successfully!", {
-          description: "We'll be in touch with you soon!",
-          duration: 5000,
-        });
-
-        // Reset form after successful submission
-        resetForm();
-      } catch (error) {
-        toast.error("Something went wrong", {
+      if (res.error) {
+        toast.error(res.error, {
           description: "Please try again later.",
         });
-        console.error("Form submission error:", error);
-      } finally {
-        setIsSubmitting(false);
+      } else {
+        toast.success("Booking request submitted!", {
+          description: "We'll be in touch with you soon!",
+        });
+        setFormState(initialFormState);
       }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      toast.error("Something went wrong", {
+        description: "Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  // Calculate completion percentage for progress bar
+  const completionPercentage = () => {
+    const requiredFields = [
+      formState.fullName,
+      formState.email,
+      formState.sessionType,
+    ];
+    const filledFields = requiredFields.filter(Boolean).length;
+    return (filledFields / requiredFields.length) * 100;
   };
 
   return (
@@ -167,17 +200,7 @@ function InquireFormWithSearchParams() {
             <div className="w-full bg-gray-100 h-1 rounded-full mb-8">
               <div
                 className="bg-secondary h-1 rounded-full transition-all duration-500 ease-in-out"
-                style={{
-                  width: `${(
-                    ([
-                      formState.fullName,
-                      formState.email,
-                      formState.sessionType,
-                    ].filter(Boolean).length /
-                      3) *
-                    100
-                  ).toFixed(0)}%`,
-                }}
+                style={{ width: `${completionPercentage().toFixed(0)}%` }}
               />
             </div>
             <form className="space-y-10" onSubmit={handleFormSubmit}>
@@ -232,43 +255,79 @@ function InquireFormWithSearchParams() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-3xl font-bold font-title text-secondary">
-                  Session Details
-                </h3>
+                {loading && (
+                  <div className="flex justify-center items-center py-12 gap-2">
+                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                    <p className="text-secondary">Loading session options...</p>
+                  </div>
+                )}
 
-                <div className="space-y-2">
-                  <Label className="text-lg flex items-center">
-                    Session Type <span className="text-red-500 ml-1">*</span>
-                  </Label>
-                  <RadioGroup
-                    value={formState.sessionType}
-                    onValueChange={(value) =>
-                      updateFormField("sessionType", value)
-                    }
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2"
-                    required
-                  >
-                    {sessionData.map((session) => (
-                      <Label
-                        key={session.id}
-                        className={`flex items-center space-x-2 p-3 rounded-lg transition-all border ${
-                          formState.sessionType === session.id
-                            ? "border-secondary bg-secondary/5"
-                            : "border-gray-200 hover:border-secondary/30"
-                        }`}
-                        htmlFor={session.id}
-                      >
-                        <RadioGroupItem
-                          value={session.id}
-                          id={session.id}
-                          className="text-secondary"
-                          required
-                        />
-                        {session.title}
+                {error && (
+                  <div className="text-red-500 text-center py-4 bg-muted/50 rounded-lg">
+                    <p>Error fetching products. Please try again.</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4"
+                      onClick={fetchSessions}
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                )}
+
+                {!loading && !error && sessionData.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-3xl font-bold font-title text-secondary">
+                      Session Details
+                    </h3>
+
+                    <div className="space-y-2">
+                      <Label className="text-lg flex items-center">
+                        Session Type{" "}
+                        <span className="text-red-500 ml-1">*</span>
                       </Label>
-                    ))}
-                  </RadioGroup>
-                </div>
+                      <RadioGroup
+                        value={formState.sessionId} // Use sessionId for selection value
+                        onValueChange={(value) => {
+                          // Find the selected session and update both ID and title
+                          const selectedSession = sessionData.find(
+                            (s) => s.id === value
+                          );
+                          if (selectedSession) {
+                            updateFormField("sessionId", value);
+                            updateFormField(
+                              "sessionType",
+                              selectedSession.title
+                            );
+                          }
+                        }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2"
+                        required
+                      >
+                        {sessionData.map((session) => (
+                          <Label
+                            key={session.id}
+                            className={`flex items-center space-x-2 p-3 rounded-lg transition-all border ${
+                              formState.sessionId === session.id
+                                ? "border-secondary bg-secondary/5"
+                                : "border-gray-200 hover:border-secondary/30"
+                            }`}
+                            htmlFor={session.id}
+                          >
+                            <RadioGroupItem
+                              value={session.id}
+                              id={session.id}
+                              className="text-secondary"
+                              required
+                            />
+                            {session.title}
+                          </Label>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -399,10 +458,10 @@ function InquireFormWithSearchParams() {
               <div className="flex justify-center">
                 <Button
                   type="submit"
-                  disabled={!isFormValid || isSubmitting}
+                  disabled={!isFormValid || isSubmitting || loading}
                   className={cn(
                     "border-red-500 bg-secondary text-white font-bold py-6 px-12 text-lg transition-all duration-200 rounded-lg hover:scale-105 active:scale-95",
-                    !isFormValid || isSubmitting
+                    !isFormValid || isSubmitting || loading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-secondary/90 shadow-lg hover:shadow-secondary/20"
                   )}
@@ -412,6 +471,8 @@ function InquireFormWithSearchParams() {
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></span>
                       Processing...
                     </span>
+                  ) : loading ? (
+                    "Loading options..."
                   ) : (
                     "Submit Inquiry"
                   )}
@@ -428,7 +489,13 @@ function InquireFormWithSearchParams() {
 // Main page component with Suspense boundary
 const InquirePage = () => {
   return (
-    <Suspense fallback={<Loader className="w-10 h-10 animate-spin" />}>
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen">
+          <Loader2 className="w-10 h-10 animate-spin text-secondary" />
+        </div>
+      }
+    >
       <InquireFormWithSearchParams />
     </Suspense>
   );

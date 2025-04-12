@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
         session_name,
         heard_from,
         message,
+        status: "pending", // Default status
       },
       include: { Product: true },
     });
@@ -140,6 +141,7 @@ export async function PUT(req: NextRequest) {
       session_name,
       heard_from,
       message,
+      status,
     } = body;
 
     // If product_id is updated, check if product exists
@@ -179,6 +181,7 @@ export async function PUT(req: NextRequest) {
         session_name,
         heard_from,
         message,
+        status,
       },
       include: { Product: true },
     });

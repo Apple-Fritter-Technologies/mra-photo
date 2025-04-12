@@ -1,6 +1,6 @@
 "use server";
 
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { getSessionToken } from "../server-service";
 import { ApiUrl } from "../utils";
 import { PortfolioImage } from "@/types/intrerface";
@@ -10,7 +10,7 @@ export const fetchPortfolioImages = async () => {
     const res = await axios.get(`${ApiUrl}/api/portfolio`);
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error fetching portfolio images:", error);
     if (axios.isAxiosError(error)) {
       return {
@@ -34,7 +34,7 @@ export const addPortfolioImage = async (image: PortfolioImage) => {
     });
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.log("Error adding portfolio image:", error.response?.data?.error);
       return {
@@ -57,7 +57,7 @@ export const deletePortfolioImage = async (id: string) => {
     });
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error deleting portfolio image:", error);
     if (axios.isAxiosError(error)) {
       return {
@@ -84,7 +84,7 @@ export const updatePortfolioImage = async (
     });
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error updating portfolio image:", error);
     if (axios.isAxiosError(error)) {
       return {

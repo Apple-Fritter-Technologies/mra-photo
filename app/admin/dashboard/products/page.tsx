@@ -11,7 +11,7 @@ import ProductModal from "../../components/product-modal";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);

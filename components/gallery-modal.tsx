@@ -318,7 +318,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
         <DialogTitle hidden />
         <div className="flex items-center justify-between p-2 sm:p-3 border-b border-primary/20">
           <h3 className="text-base font-medium text-secondary truncate">
-            {images[modalImageIndex]?.alt || "Image Gallery"}
+            {images[modalImageIndex]?.title || "Image Gallery"}
           </h3>
         </div>
 
@@ -367,39 +367,42 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
               className="flex transition-transform h-full"
               style={getGalleryTransform()}
             >
-              {images.map((img, i) => (
-                <div
-                  key={`modal-img-${i}`}
-                  className="w-full min-w-full flex items-center justify-center"
-                  style={{ flex: "0 0 100%" }}
-                >
-                  <div className="relative max-w-full flex items-center justify-center">
-                    <Image
-                      ref={(el) => {
-                        imageRefs.current[i] = el;
-                      }}
-                      src={img.src}
-                      alt={img.alt || "Gallery image"}
-                      width={800}
-                      height={1200}
-                      className="rounded-lg shadow-lg object-contain w-full h-full max-w-[98%] max-h-[98%] transition-transform duration-300 ease-in-out"
-                      style={{
-                        transform: `scale(${zoomLevel[i] || 1})`,
-                        cursor: zoomLevel[i] > 1 ? "zoom-out" : "zoom-in",
-                      }}
-                      draggable={false}
-                      priority={
-                        i === modalImageIndex ||
-                        i === (modalImageIndex + 1) % images.length ||
-                        i ===
-                          (modalImageIndex === 0
-                            ? images.length - 1
-                            : modalImageIndex - 1)
-                      }
-                    />
-                  </div>
-                </div>
-              ))}
+              {images.map(
+                (img, i) =>
+                  img.url && (
+                    <div
+                      key={`modal-img-${i}`}
+                      className="w-full min-w-full flex items-center justify-center"
+                      style={{ flex: "0 0 100%" }}
+                    >
+                      <div className="relative max-w-full flex items-center justify-center">
+                        <Image
+                          ref={(el) => {
+                            imageRefs.current[i] = el;
+                          }}
+                          src={img.url}
+                          alt={img.title || "Gallery image"}
+                          width={800}
+                          height={1200}
+                          className="rounded-lg shadow-lg object-contain w-full h-full max-w-[98%] max-h-[98%] transition-transform duration-300 ease-in-out"
+                          style={{
+                            transform: `scale(${zoomLevel[i] || 1})`,
+                            cursor: zoomLevel[i] > 1 ? "zoom-out" : "zoom-in",
+                          }}
+                          draggable={false}
+                          priority={
+                            i === modalImageIndex ||
+                            i === (modalImageIndex + 1) % images.length ||
+                            i ===
+                              (modalImageIndex === 0
+                                ? images.length - 1
+                                : modalImageIndex - 1)
+                          }
+                        />
+                      </div>
+                    </div>
+                  )
+              )}
             </div>
           </div>
 
@@ -512,30 +515,33 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
               msOverflowStyle: "none",
             }}
           >
-            {images.map((img, i) => (
-              <button
-                key={`thumb-${i}`}
-                className={cn(
-                  "relative rounded-md overflow-hidden transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary w-8 h-12 sm:w-12 sm:h-16 lg:w-14 lg:h-20 flex-shrink-0",
-                  modalImageIndex === i
-                    ? "ring-2 ring-secondary scale-105 shadow-md"
-                    : "opacity-70 hover:opacity-100"
-                )}
-                onClick={() => setModalImageIndex(i)}
-              >
-                <Image
-                  src={img.src}
-                  alt={`Thumbnail ${i + 1}`}
-                  fill
-                  sizes="(max-width: 640px) 40px, 56px"
-                  className="object-cover"
-                  draggable={false}
-                />
-                {modalImageIndex === i && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-secondary" />
-                )}
-              </button>
-            ))}
+            {images.map(
+              (img, i) =>
+                img.url && (
+                  <button
+                    key={`thumb-${i}`}
+                    className={cn(
+                      "relative rounded-md overflow-hidden transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary w-8 h-12 sm:w-12 sm:h-16 lg:w-14 lg:h-20 flex-shrink-0",
+                      modalImageIndex === i
+                        ? "ring-2 ring-secondary scale-105 shadow-md"
+                        : "opacity-70 hover:opacity-100"
+                    )}
+                    onClick={() => setModalImageIndex(i)}
+                  >
+                    <Image
+                      src={img.url}
+                      alt={`Thumbnail ${i + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 40px, 56px"
+                      className="object-cover"
+                      draggable={false}
+                    />
+                    {modalImageIndex === i && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-secondary" />
+                    )}
+                  </button>
+                )
+            )}
           </div>
         </div>
       </DialogContent>

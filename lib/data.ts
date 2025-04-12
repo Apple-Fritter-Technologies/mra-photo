@@ -52,6 +52,13 @@ export const adminNavItems = [
   },
 ];
 
+export const BookingStatusOptions = [
+  "pending",
+  "confirmed",
+  "completed",
+  "cancelled",
+];
+
 export const sessionData = [
   {
     id: "lifestyle",

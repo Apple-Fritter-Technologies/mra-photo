@@ -14,6 +14,7 @@ model Booking {
   email        String
   date         DateTime
   time         String
+  status       String   @default("pending")
   product_id   String?
   session_name String?
   heard_from   String?

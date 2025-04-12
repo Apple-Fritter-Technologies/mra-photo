@@ -14,7 +14,7 @@ import PortfolioModal from "../../components/portfolio-modal";
 
 const PortfolioPage = () => {
   const [images, setImages] = useState<PortfolioImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -87,6 +87,16 @@ const PortfolioPage = () => {
           <p className="text-sm text-muted-foreground mt-2">
             Add images to showcase your work
           </p>
+          <Button
+            className="mt-4"
+            onClick={() => {
+              setOpen(true);
+              setIsEditing(false);
+              setCurrentImage(null);
+            }}
+          >
+            Add Image
+          </Button>
         </div>
       ) : (
         <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 py-8">

@@ -1,12 +1,15 @@
+"use server";
+
 import { Product } from "@/types/intrerface";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { getSessionToken } from "../server-service";
+import { ApiUrl } from "../utils";
 
 export const getProducts = async () => {
   try {
-    const res = await axios.get(`/api/products`);
+    const res = await axios.get(`${ApiUrl}/api/products`);
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error fetching products:", error);
     if (axios.isAxiosError(error)) {
       return {
@@ -24,12 +27,12 @@ export const addProduct = async (product: Product) => {
   }
 
   try {
-    const res = await axios.post(`/api/products`, product, {
+    const res = await axios.post(`${ApiUrl}/api/products`, product, {
       headers: { Authorization: `Bearer ${sessionToken}` },
     });
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error adding product:", error);
     if (axios.isAxiosError(error)) {
       return {
@@ -47,12 +50,16 @@ export const updateProduct = async (product: Product) => {
   }
 
   try {
-    const res = await axios.put(`/api/products?id=${product.id}`, product, {
-      headers: { Authorization: `Bearer ${sessionToken}` },
-    });
+    const res = await axios.put(
+      `${ApiUrl}/api/products?id=${product.id}`,
+      product,
+      {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      }
+    );
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error updating product:", error);
     if (axios.isAxiosError(error)) {
       return {
@@ -70,12 +77,12 @@ export const deleteProduct = async (id: string) => {
   }
 
   try {
-    const res = await axios.delete(`/api/products?id=${id}`, {
+    const res = await axios.delete(`${ApiUrl}/api/products?id=${id}`, {
       headers: { Authorization: `Bearer ${sessionToken}` },
     });
 
     return res.data;
-  } catch (error: AxiosError | unknown) {
+  } catch (error: unknown) {
     console.error("Error deleting product:", error);
     if (axios.isAxiosError(error)) {
       return {
