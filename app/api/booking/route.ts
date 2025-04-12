@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     // Get bookings with filters
     const bookings = await prisma.booking.findMany({
-      include: { product: true },
+      include: { Product: true },
       orderBy: { created_at: "desc" },
     });
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
         heard_from,
         message,
       },
-      include: { product: true },
+      include: { Product: true },
     });
 
     return NextResponse.json(booking, { status: 201 });
@@ -180,7 +180,7 @@ export async function PUT(req: NextRequest) {
         heard_from,
         message,
       },
-      include: { product: true },
+      include: { Product: true },
     });
 
     return NextResponse.json(updatedBooking, { status: 200 });

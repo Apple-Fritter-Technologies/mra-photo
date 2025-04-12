@@ -247,13 +247,15 @@ const PortfolioModal = ({
               <div className="mt-2 p-2 border rounded">
                 <p className="text-sm text-muted-foreground mb-2">Preview:</p>
 
-                <Image
-                  src={imageUrl}
-                  alt="Preview"
-                  height={240}
-                  width={240}
-                  className="object-contain rounded mx-auto w-fit h-full max-h-64"
-                />
+                <div>
+                  <Image
+                    src={imageUrl}
+                    alt="Preview"
+                    height={240}
+                    width={240}
+                    className="object-contain rounded mx-auto w-auto h-full max-h-64"
+                  />
+                </div>
               </div>
             )}
           </div>
