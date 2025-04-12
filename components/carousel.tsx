@@ -11,19 +11,10 @@ import React, {
 } from "react";
 import { cn } from "@/lib/utils";
 import GalleryModal from "./gallery-modal";
-import { ImageItem } from "@/types/intrerface";
+import { carouselImages } from "@/lib/data";
 
 const Carousel = () => {
-  const images: ImageItem[] = [
-    { src: "/images/carousel.jpg", alt: "Portrait photo 1" },
-    { src: "/images/child.jpg", alt: "Portrait photo 3" },
-    { src: "/images/carousel2.jpg", alt: "Portrait photo 2" },
-    { src: "/images/carousel.jpg", alt: "Portrait photo 1" },
-    { src: "/images/landscape.jpg", alt: "Portrait photo 4" },
-    { src: "/images/child.jpg", alt: "Portrait photo 3" },
-    { src: "/images/carousel2.jpg", alt: "Portrait photo 2" },
-    { src: "/images/landscape.jpg", alt: "Portrait photo 4" },
-  ];
+  const images = carouselImages;
 
   const [currentIndex, setCurrentIndex] = useState(images.length); // Start from the middle set
   const [isHovering, setIsHovering] = useState(false);
@@ -126,12 +117,12 @@ const Carousel = () => {
       const realIndex = i % images.length;
       return (
         <div
-          key={`${img.src}-${i}`}
+          key={`${img.id}-${i}`}
           className="carousel-item shrink-0 transition-all px-1"
           onClick={() => handleImageClick(realIndex)}
           role="button"
           tabIndex={0}
-          aria-label={`View ${img.alt}`}
+          aria-label={`View ${img.title}`}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               handleImageClick(realIndex);
@@ -140,8 +131,8 @@ const Carousel = () => {
         >
           <div className="overflow-hidden rounded-lg group shadow-md h-[500px] w-[300px]">
             <Image
-              src={img.src}
-              alt={img.alt || "Carousel image"}
+              src={img.url}
+              alt={img.title || "Carousel image"}
               width={300}
               height={500}
               className="object-cover w-full h-full rounded-lg cursor-pointer group-hover:scale-105 transition-all duration-300"
