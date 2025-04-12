@@ -105,7 +105,6 @@ function InquireFormWithSearchParams() {
         }
       }
     } catch (error: unknown) {
-      console.error("Failed to fetch sessions:", error);
       setError(true);
       toast.error("Couldn't load session types");
     } finally {
@@ -143,23 +142,6 @@ function InquireFormWithSearchParams() {
 
     setIsSubmitting(true);
     try {
-      // const apiBooking = {
-      //   name: booking.fullName,
-      //   email: booking.email,
-      //   date: booking.date || new Date(),
-      //   time: booking.preferredTime || "Any time",
-      //   session_name: booking.sessionType,
-      //   heard_from: booking.referralSource,
-      //   message: booking.additionalInfo || "",
-      //   // If otherReferral is provided and referralSource is 'other', add it to message
-      //   ...(booking.otherReferral &&
-      //     booking.referralSource === "other" && {
-      //       message: `${booking.additionalInfo || ""}\n\nReferral Source: ${
-      //         booking.otherReferral
-      //       }`,
-      //     }),
-      // };
-
       const submissionData: Booking = {
         id: formState.sessionId,
         name: formState.fullName,
@@ -193,7 +175,6 @@ function InquireFormWithSearchParams() {
         setFormState(initialFormState);
       }
     } catch (error) {
-      console.error("Form submission error:", error);
       toast.error("Something went wrong", {
         description: "Please try again later.",
       });
@@ -389,6 +370,9 @@ function InquireFormWithSearchParams() {
                           mode="single"
                           selected={formState.date}
                           onSelect={(date) => updateFormField("date", date)}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
                           initialFocus
                           className="text-secondary"
                         />

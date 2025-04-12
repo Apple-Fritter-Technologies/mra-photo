@@ -1,5 +1,13 @@
 import { PortfolioImage } from "@/types/intrerface";
-import { Box, Calendar, Home, Image } from "lucide-react";
+import {
+  Box,
+  Calendar,
+  CalendarIcon,
+  CameraIcon,
+  Home,
+  Image,
+  PackageIcon,
+} from "lucide-react";
 
 export const navigation = [
   {
@@ -68,4 +76,25 @@ export const carouselImages: PortfolioImage[] = [
   { id: "16", url: "/images/child.jpg", title: "Portrait photo 3" },
   { id: "17", url: "/images/carousel2.jpg", title: "Portrait photo 2" },
   { id: "18", url: "/images/landscape.jpg", title: "Portrait photo 4" },
+];
+
+export const dashboardQuickAction = [
+  {
+    icon: CameraIcon,
+    label: "Add New Photoshoot",
+    href: "/admin/dashboard/portfolio",
+    color: "bg-blue-500/10 text-blue-500",
+  },
+  {
+    icon: CalendarIcon,
+    label: "Manage Bookings",
+    href: "/admin/dashboard/bookings",
+    color: "bg-amber-500/10 text-amber-500",
+  },
+  {
+    icon: PackageIcon,
+    label: "Manage Products",
+    href: "/admin/dashboard/products",
+    color: "bg-green-500/10 text-green-500",
+  },
 ];

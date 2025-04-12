@@ -30,7 +30,6 @@ const InvestmentPage = () => {
         setSessions(res);
       }
     } catch (error: unknown) {
-      console.error("Error fetching sessions:", error);
       setError(true);
       toast.error("An unexpected error occurred while fetching sessions.");
     } finally {
@@ -105,7 +104,7 @@ const InvestmentPage = () => {
                 <div className="flex justify-between items-center">
                   <h3 className="text-2xl font-semibold">{pkg.title}</h3>
                   <span className="text-xl font-bold text-secondary">
-                    {pkg.price}
+                    ${pkg.price}
                   </span>
                 </div>
 
