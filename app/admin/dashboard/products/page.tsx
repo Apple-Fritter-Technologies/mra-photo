@@ -32,7 +32,6 @@ const ProductsPage = () => {
         setProducts(data);
       }
     } catch (error: unknown) {
-      console.error("Error fetching products:", error);
       setError(true);
       toast.error("Failed to fetch products");
     } finally {

@@ -11,7 +11,6 @@ export const fetchPortfolioImages = async () => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error fetching portfolio images:", error);
     if (axios.isAxiosError(error)) {
       return {
         error:
@@ -36,7 +35,6 @@ export const addPortfolioImage = async (image: PortfolioImage) => {
     return res.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.log("Error adding portfolio image:", error.response?.data?.error);
       return {
         error: error.response?.data?.error || "Failed to add portfolio image",
       };
@@ -58,7 +56,6 @@ export const deletePortfolioImage = async (id: string) => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error deleting portfolio image:", error);
     if (axios.isAxiosError(error)) {
       return {
         error:
@@ -85,7 +82,6 @@ export const updatePortfolioImage = async (
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error updating portfolio image:", error);
     if (axios.isAxiosError(error)) {
       return {
         error:

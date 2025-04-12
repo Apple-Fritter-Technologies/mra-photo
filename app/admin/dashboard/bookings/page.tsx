@@ -49,7 +49,6 @@ const BookingsPage = () => {
         setBookings(res);
       }
     } catch (error: unknown) {
-      console.error("Error fetching bookings:", error);
       setError(true);
       toast.error("Failed to fetch bookings");
     } finally {
@@ -64,7 +63,6 @@ const BookingsPage = () => {
       await getBookings();
       toast.success("Bookings refreshed");
     } catch (error: unknown) {
-      console.error("Error refreshing bookings:", error);
     } finally {
       setRefreshing(false);
     }
@@ -100,7 +98,6 @@ const BookingsPage = () => {
         "MMM d, yyyy"
       );
     } catch (error: unknown) {
-      console.error("Error formatting date:", error);
       return "Invalid date";
     }
   };

@@ -89,7 +89,6 @@ const BookingModal = ({
         handleClose();
       }
     } catch (error) {
-      console.error("Error updating booking status:", error);
       toast.error("Failed to update booking status");
     } finally {
       setIsSubmitting(false);
@@ -118,7 +117,6 @@ const BookingModal = ({
         await refreshBookings();
       }
     } catch (error) {
-      console.error("Error deleting booking:", error);
       toast.error("Failed to delete booking");
     } finally {
       setIsSubmitting(false);
@@ -130,7 +128,6 @@ const BookingModal = ({
       const dateObject = date instanceof Date ? date : new Date(date);
       return format(dateObject, "MMMM d, yyyy");
     } catch (error: unknown) {
-      console.error("Error formatting date:", error);
       return String(date);
     }
   };

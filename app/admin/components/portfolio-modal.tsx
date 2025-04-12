@@ -81,7 +81,6 @@ const PortfolioModal = ({
         });
       }
     } catch (error) {
-      console.error("Failed to add portfolio image:", error);
       toast.error("Failed to add portfolio image");
     } finally {
       setSubmitting(false);
@@ -106,7 +105,6 @@ const PortfolioModal = ({
         await getPortfolioImages();
       }
     } catch (error) {
-      console.error("Failed to add portfolio image:", error);
       toast.error("Failed to add portfolio image");
     } finally {
       setSubmitting(false);
@@ -128,7 +126,6 @@ const PortfolioModal = ({
         await getPortfolioImages();
       }
     } catch (error) {
-      console.error("Failed to delete portfolio image:", error);
       toast.error("Failed to delete portfolio image");
     } finally {
       setSubmitting(false);
@@ -173,7 +170,6 @@ const PortfolioModal = ({
         await getPortfolioImages();
       }
     } catch (error) {
-      console.error("Failed to update portfolio image:", error);
       toast.error("Failed to update portfolio image");
     } finally {
       setSubmitting(false);

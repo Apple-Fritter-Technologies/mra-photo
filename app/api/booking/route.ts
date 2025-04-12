@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(bookings, { status: 200 });
   } catch (error) {
-    console.error("Error fetching bookings:", error);
     return NextResponse.json(
       { error: "Failed to fetch bookings" },
       { status: 500 }
@@ -95,7 +94,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
-    console.error("Error creating booking:", error);
     return NextResponse.json(
       { error: "Failed to create booking" },
       { status: 500 }
@@ -188,7 +186,6 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(updatedBooking, { status: 200 });
   } catch (error) {
-    console.error("Error updating booking:", error);
     return NextResponse.json(
       { error: "Failed to update booking" },
       { status: 500 }
@@ -234,7 +231,6 @@ export async function DELETE(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error deleting booking:", error);
     return NextResponse.json(
       { error: "Failed to delete booking" },
       { status: 500 }

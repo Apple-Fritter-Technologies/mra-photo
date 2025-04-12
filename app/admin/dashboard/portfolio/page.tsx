@@ -32,7 +32,6 @@ const PortfolioPage = () => {
         setImages(res);
       }
     } catch (error: unknown) {
-      console.error("Error fetching portfolio images:", error);
       setError(true);
       toast.error("Failed to fetch portfolio images");
     } finally {

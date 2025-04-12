@@ -27,7 +27,6 @@ export const loginUser = async ({ email, password }: User) => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error logging in:", error);
     if (axios.isAxiosError(error)) {
       return {
         error:
@@ -48,7 +47,6 @@ export const verifyUserToken = async (token: string) => {
     });
     return res.data;
   } catch (error: unknown) {
-    console.error("Error verifying token:", error);
     if (axios.isAxiosError(error)) {
       return {
         authorized: false,

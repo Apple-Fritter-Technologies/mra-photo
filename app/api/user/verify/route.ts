@@ -30,14 +30,12 @@ export async function POST(req: Request) {
         { status: 200 }
       );
     } catch (error) {
-      console.error("Token verification error:", error);
       return NextResponse.json(
         { authorized: false, error: "Invalid or expired token" },
         { status: 401 }
       );
     }
   } catch (error) {
-    console.error("Token verification error:", error);
     return NextResponse.json(
       { authorized: false, error: "Token verification failed" },
       { status: 500 }

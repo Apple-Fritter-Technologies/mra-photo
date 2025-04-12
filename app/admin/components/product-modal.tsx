@@ -129,7 +129,6 @@ const ProductModal = ({
         });
       }
     } catch (error) {
-      console.error("Failed to add product:", error);
       toast.error("Failed to add product");
     } finally {
       setIsSubmitting(false);
@@ -150,7 +149,6 @@ const ProductModal = ({
         await refreshProducts();
       }
     } catch (error) {
-      console.error("Error adding product:", error);
       toast.error("Failed to add product");
     } finally {
       setIsSubmitting(false);
@@ -208,7 +206,6 @@ const ProductModal = ({
         await refreshProducts();
       }
     } catch (error) {
-      console.error("Error updating product:", error);
       toast.error("Failed to update product");
     } finally {
       setIsSubmitting(false);
@@ -228,7 +225,6 @@ const ProductModal = ({
         await refreshProducts();
       }
     } catch (error) {
-      console.error("Error deleting product:", error);
       toast.error("Failed to delete product");
     } finally {
       setIsSubmitting(false);

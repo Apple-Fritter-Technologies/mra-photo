@@ -30,7 +30,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           setToken(token);
         }
       } catch (error) {
-        console.error("Token verification error:", error);
         toast.error("Token verification failed. Please log in again.");
         removeToken();
       }

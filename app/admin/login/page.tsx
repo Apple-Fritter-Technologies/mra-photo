@@ -57,7 +57,6 @@ const DashboardLoginPage = () => {
         description: "Please check your credentials and try again.",
         duration: 3000,
       });
-      console.error("Login failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +82,6 @@ const DashboardLoginPage = () => {
           }
         }
       } catch (error) {
-        console.error("Token verification error:", error);
         toast.error("Token verification failed. Please log in again.");
         removeToken();
       }

@@ -35,7 +35,6 @@ export const removeSessionToken = async () => {
     cookieStore.delete("auth_token");
     return true;
   } catch (error) {
-    console.error("Error removing session token:", error);
     return false;
   }
 };

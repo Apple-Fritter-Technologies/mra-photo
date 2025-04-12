@@ -18,7 +18,6 @@ export const fetchBookings = async () => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error fetching bookings:", error);
     if (axios.isAxiosError(error)) {
       return {
         error: error.response?.data?.error || "Failed to fetch bookings",
@@ -42,7 +41,6 @@ export const createBooking = async (booking: Booking) => {
     return res.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.log("Error adding booking:", error.response?.data?.error);
       return {
         error: error.response?.data?.error || "Failed to add booking",
       };
@@ -72,7 +70,6 @@ export const updateBooking = async (booking: {
     return res.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.log("Error updating booking:", error.response?.data?.error);
       return {
         error: error.response?.data?.error || "Failed to update booking",
       };
@@ -95,7 +92,6 @@ export const deleteBooking = async (id: string) => {
     return res.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.log("Error deleting booking:", error.response?.data?.error);
       return {
         error: error.response?.data?.error || "Failed to delete booking",
       };

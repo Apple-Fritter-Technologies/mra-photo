@@ -10,7 +10,6 @@ export const getProducts = async () => {
     const res = await axios.get(`${ApiUrl}/api/products`);
     return res.data;
   } catch (error: unknown) {
-    console.error("Error fetching products:", error);
     if (axios.isAxiosError(error)) {
       return {
         error: error.response?.data?.error || "Failed to fetch products",
@@ -33,7 +32,6 @@ export const addProduct = async (product: Product) => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error adding product:", error);
     if (axios.isAxiosError(error)) {
       return {
         error: error.response?.data?.error || "Failed to add product",
@@ -60,7 +58,6 @@ export const updateProduct = async (product: Product) => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error updating product:", error);
     if (axios.isAxiosError(error)) {
       return {
         error: error.response?.data?.error || "Failed to update product",
@@ -83,7 +80,6 @@ export const deleteProduct = async (id: string) => {
 
     return res.data;
   } catch (error: unknown) {
-    console.error("Error deleting product:", error);
     if (axios.isAxiosError(error)) {
       return {
         error: error.response?.data?.error || "Failed to delete product",

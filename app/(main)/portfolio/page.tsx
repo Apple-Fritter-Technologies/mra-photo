@@ -43,7 +43,6 @@ const PortfolioPage = () => {
         setPortfolioImages(res);
       }
     } catch (error: unknown) {
-      console.error("Error fetching portfolio images:", error);
       setError(true);
       toast.error("An unexpected error occurred while fetching images.");
     } finally {
