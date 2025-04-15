@@ -14,7 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertTriangle, Mail, Lock, Camera } from "lucide-react";
+import {
+  Loader2,
+  AlertTriangle,
+  Mail,
+  Lock,
+  Camera,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { loginUser, verifyUserToken } from "@/lib/actions/user-action";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
@@ -26,6 +34,7 @@ const DashboardLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [token, setToken, removeToken] = useLocalStorage("token", "");
 
@@ -173,8 +182,8 @@ const DashboardLoginPage = () => {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                   <Input
                     id="password"
-                    type="password"
-                    className="pl-10"
+                    type={showPassword ? "text" : "password"}
+                    className="pl-10 pr-10"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -182,6 +191,17 @@ const DashboardLoginPage = () => {
                     autoComplete="current-password"
                     disabled={isLoading}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    {showPassword ? (
+                      <Eye className="h-4 w-4 text-slate-500" />
+                    ) : (
+                      <EyeOff className="h-4 w-4 text-slate-500" />
+                    )}
+                  </button>
                 </div>
               </div>
 
