@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
     const totalPortfolios = await prisma.portfolio.count();
     const totalUsers = await prisma.user.count();
     const totalBookings = await prisma.booking.count();
+    const totalCarousels = await prisma.carousel.count();
 
     return NextResponse.json(
       {
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
         totalPortfolios,
         totalUsers,
         totalBookings,
+        totalCarousels,
       },
       { status: 200 }
     );

@@ -71,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="mt-28 md:mt-36 overflow-hidden">
+    <div className="mt-32 md:mt-36 overflow-hidden">
       <Navbar />
       {children}
       <Footer />

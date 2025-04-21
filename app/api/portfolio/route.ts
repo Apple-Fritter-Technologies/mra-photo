@@ -46,16 +46,19 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { url, title } = body;
+    const { image_url, title } = body;
 
     // Validate required field
-    if (!url) {
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    if (!image_url) {
+      return NextResponse.json(
+        { error: "Image URL is required" },
+        { status: 400 }
+      );
     }
 
     // Check if portfolio with this URL already exists
     const existingPortfolio = await prisma.portfolio.findUnique({
-      where: { url },
+      where: { image_url },
     });
 
     if (existingPortfolio) {
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest) {
     // Create portfolio
     const portfolio = await prisma.portfolio.create({
       data: {
-        url,
+        image_url,
         title: title || "Portfolio", // Use provided title or default
       },
     });
@@ -114,12 +117,12 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { url, title } = body;
+    const { image_url, title } = body;
 
     // If URL is being updated, check for uniqueness
-    if (url && url !== existingPortfolio.url) {
+    if (image_url && image_url !== existingPortfolio.image_url) {
       const urlExists = await prisma.portfolio.findUnique({
-        where: { url },
+        where: { image_url },
       });
 
       if (urlExists) {
@@ -134,7 +137,7 @@ export async function PUT(req: NextRequest) {
     const updatedPortfolio = await prisma.portfolio.update({
       where: { id },
       data: {
-        url,
+        image_url,
         title: title || "Portfolio",
       },
     });

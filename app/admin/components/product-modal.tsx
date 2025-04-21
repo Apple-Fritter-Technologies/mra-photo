@@ -213,6 +213,12 @@ const ProductModal = ({
   };
 
   const handleDelete = async (id: string) => {
+    // confirm delete action
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product? This action cannot be undone."
+    );
+    if (!confirmDelete) return;
+
     setIsSubmitting(true);
     try {
       const res = await deleteProduct(id);

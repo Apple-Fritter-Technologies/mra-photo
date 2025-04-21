@@ -96,7 +96,7 @@ const PortfolioPage = () => {
         <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 py-12">
           {portfolioImages.map(
             (image, index) =>
-              image?.url && (
+              image?.image_url && (
                 <motion.div
                   key={index}
                   className="mb-6 break-inside-avoid"
@@ -117,7 +117,7 @@ const PortfolioPage = () => {
                     }}
                   >
                     <Image
-                      src={image.url}
+                      src={image.image_url}
                       alt={image.title || ""}
                       width={600}
                       height={600}

@@ -26,7 +26,7 @@ const Navbar = () => {
             alt="Logo"
             width={200}
             height={200}
-            className="rounded-full w-16 h-1w-16 md:w-24 md:h-24"
+            className="rounded-full w-20 h-20 md:w-24 md:h-24"
             priority
           />
         </Link>

@@ -11,10 +11,15 @@ import React, {
 } from "react";
 import { cn } from "@/lib/utils";
 import GalleryModal from "./gallery-modal";
-import { carouselImages } from "@/lib/data";
+import { CarouselImage } from "@/types/intrerface";
+import { fetchCarouselImages } from "@/lib/actions/carousel-actions";
+import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
 
 const Carousel = () => {
-  const images = carouselImages;
+  const [images, setImages] = useState<CarouselImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(images.length); // Start from the middle set
   const [isHovering, setIsHovering] = useState(false);
@@ -32,7 +37,28 @@ const Carousel = () => {
   const itemWidth = 300 + 16; // image width + gap
 
   // Reduce the scroll speed for smoother appearance
-  const scrollSpeed = 0.15; // Reduced from 0.5 for slower scrolling
+  const scrollSpeed = 0.1; // Reduced from 0.5 for slower scrolling
+
+  // Fetch images from the server
+  const fetchImages = async () => {
+    setLoading(true);
+    try {
+      const res = await fetchCarouselImages();
+      if (res.error) {
+        setError(true);
+      } else {
+        setImages(res);
+      }
+    } catch (error) {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   // Enhanced smooth auto-scroll with RAF for smoother animations
   useEffect(() => {
@@ -131,7 +157,7 @@ const Carousel = () => {
         >
           <div className="overflow-hidden rounded-lg group shadow-md h-[500px] w-[300px]">
             <Image
-              src={img.url}
+              src={img.image_url}
               alt={img.title || "Carousel image"}
               width={300}
               height={500}
@@ -251,33 +277,57 @@ const Carousel = () => {
 
   return (
     <>
-      <div
-        className="relative overflow-hidden w-full cursor-grab active:cursor-grabbing rounded-lg"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => !isDragging && setIsHovering(false)}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        ref={carouselRef}
-        aria-label="Image carousel"
-        role="region"
-      >
-        <div
-          className={cn(
-            "flex",
-            transitionActive && "transition-all duration-500 ease-out" // Increased duration for smoother appearance
-          )}
-          style={{
-            transform: `translateX(${getCarouselTransform()}px)`,
-            willChange: "transform",
-          }}
-        >
-          {getCarouselItems()}
+      {error && (
+        <div className="text-red-500 text-center py-4 bg-muted/50 rounded-lg">
+          <p>Error fetching products. Please try again.</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => {
+              setError(false);
+              fetchImages();
+            }}
+          >
+            Retry
+          </Button>
         </div>
-      </div>
+      )}
+
+      {loading && (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {!loading && !error && images.length > 0 && (
+        <div
+          className="relative overflow-hidden w-full cursor-grab active:cursor-grabbing rounded-lg"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => !isDragging && setIsHovering(false)}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          ref={carouselRef}
+          aria-label="Image carousel"
+          role="region"
+        >
+          <div
+            className={cn(
+              "flex",
+              transitionActive && "transition-all duration-500 ease-out" // Increased duration for smoother appearance
+            )}
+            style={{
+              transform: `translateX(${getCarouselTransform()}px)`,
+              willChange: "transform",
+            }}
+          >
+            {getCarouselItems()}
+          </div>
+        </div>
+      )}
 
       <GalleryModal
         open={modalOpen}

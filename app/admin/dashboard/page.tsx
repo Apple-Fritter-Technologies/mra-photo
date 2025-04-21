@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import {
   CalendarIcon,
-  CameraIcon,
   UsersIcon,
   PackageIcon,
   FolderIcon,
@@ -30,6 +29,7 @@ interface DashboardData {
   totalPortfolios: number;
   totalUsers: number;
   totalBookings: number;
+  totalCarousels: number;
 }
 
 const fadeIn = {
@@ -41,6 +41,44 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const stats = [
+    {
+      title: "Total Products",
+      value: data?.totalProducts,
+      description: "Total number of products listed",
+      icon: <PackageIcon size={20} />,
+      color: "bg-green-500/10 text-green-500",
+    },
+    {
+      title: "Total Portfolios",
+      value: data?.totalPortfolios,
+      description: "Total number of portfolios created",
+      icon: <FolderIcon size={20} />,
+      color: "bg-blue-500/10 text-blue-500",
+    },
+    {
+      title: "Total Users",
+      value: data?.totalUsers,
+      description: "Total number of registered users",
+      icon: <UsersIcon size={20} />,
+      color: "bg-purple-500/10 text-purple-500",
+    },
+    {
+      title: "Total Bookings",
+      value: data?.totalBookings,
+      description: "Total number of bookings made",
+      icon: <CalendarIcon size={20} />,
+      color: "bg-orange-500/10 text-orange-500",
+    },
+    {
+      title: "Total Carousel Images",
+      value: data?.totalCarousels,
+      description: "Total number of images in the carousel",
+      icon: <PackageIcon size={20} />,
+      color: "bg-red-500/10 text-red-500",
+    },
+  ];
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -102,36 +140,7 @@ export default function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {[
-          {
-            title: "Products",
-            icon: <PackageIcon className="h-5 w-5" />,
-            value: data?.totalProducts || 0,
-            description: "Available products",
-            color: "bg-blue-500/10 text-blue-500",
-          },
-          {
-            title: "Portfolios",
-            icon: <FolderIcon className="h-5 w-5" />,
-            value: data?.totalPortfolios || 0,
-            description: "Published collections",
-            color: "bg-amber-500/10 text-amber-500",
-          },
-          {
-            title: "Active Users",
-            icon: <UsersIcon className="h-5 w-5" />,
-            value: data?.totalUsers || 0,
-            description: "Registered clients",
-            color: "bg-green-500/10 text-green-500",
-          },
-          {
-            title: "Bookings",
-            icon: <CalendarIcon className="h-5 w-5" />,
-            value: data?.totalBookings || 0,
-            description: "Total sessions booked",
-            color: "bg-purple-500/10 text-purple-500",
-          },
-        ].map((stat, index) => (
+        {stats.map((stat, index) => (
           <motion.div
             key={stat.title}
             initial="hidden"

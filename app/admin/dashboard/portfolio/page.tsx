@@ -51,7 +51,7 @@ const PortfolioPage = () => {
         <PortfolioModal
           open={open}
           setOpen={setOpen}
-          imageData={currentImage || { id: "", url: "", title: "" }}
+          imageData={currentImage || { id: "", image_url: "", title: "" }}
           getPortfolioImages={getPortfolioImages}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
@@ -106,7 +106,7 @@ const PortfolioPage = () => {
             >
               <div className="relative">
                 <Image
-                  src={image.url}
+                  src={image.image_url}
                   alt={image.title}
                   width={600}
                   height={600}

@@ -369,7 +369,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
             >
               {images.map(
                 (img, i) =>
-                  img.url && (
+                  img.image_url && (
                     <div
                       key={`modal-img-${i}`}
                       className="w-full min-w-full flex items-center justify-center"
@@ -380,7 +380,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                           ref={(el) => {
                             imageRefs.current[i] = el;
                           }}
-                          src={img.url}
+                          src={img.image_url}
                           alt={img.title || "Gallery image"}
                           width={800}
                           height={1200}
@@ -517,7 +517,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
           >
             {images.map(
               (img, i) =>
-                img.url && (
+                img.image_url && (
                   <button
                     key={`thumb-${i}`}
                     className={cn(
@@ -529,7 +529,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({
                     onClick={() => setModalImageIndex(i)}
                   >
                     <Image
-                      src={img.url}
+                      src={img.image_url}
                       alt={`Thumbnail ${i + 1}`}
                       fill
                       sizes="(max-width: 640px) 40px, 56px"

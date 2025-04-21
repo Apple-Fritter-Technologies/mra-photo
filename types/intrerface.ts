@@ -1,7 +1,7 @@
 export interface GalleryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  images: PortfolioImage[];
+  images: CarouselImage[] | PortfolioImage[];
   initialImageIndex: number;
 }
 
@@ -17,10 +17,16 @@ export interface User {
 
 export interface PortfolioImage {
   id: string;
-  url: string;
+  image_url: string;
   title: string;
 }
 
+export interface CarouselImage {
+  id: string;
+  image_url: string;
+  title?: string;
+  displayOrder?: number;
+}
 export interface Product {
   id: string;
   title: string;

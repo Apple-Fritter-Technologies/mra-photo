@@ -68,7 +68,7 @@ export const deletePortfolioImage = async (id: string) => {
 
 export const updatePortfolioImage = async (
   id: string,
-  image: { url: string; title: string }
+  image: PortfolioImage
 ) => {
   const sessionToken = await getSessionToken();
   if (!sessionToken) {

@@ -26,10 +26,19 @@ model Booking {
 
 model Portfolio {
   id         String   @id @default(uuid())
-  url        String   @unique
+  image_url  String   @unique
   title      String?  @default("Portfolio")
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
+}
+
+model Carousel {
+  id           String   @id @default(uuid())
+  image_url    String
+  title        String?  @default("Carousel")
+  displayOrder Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
 }
 
 model Product {

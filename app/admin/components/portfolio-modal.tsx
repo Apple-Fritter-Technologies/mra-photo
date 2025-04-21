@@ -39,12 +39,12 @@ const PortfolioModal = ({
   imageData,
 }: PortfolioModalProps) => {
   const [submitting, setSubmitting] = useState(false);
-  const [imageUrl, setImageUrl] = useState(imageData.url);
+  const [imageUrl, setImageUrl] = useState(imageData.image_url);
   const [imageTitle, setImageTitle] = useState(imageData.title);
 
   useEffect(() => {
     if (isEditing) {
-      setImageUrl(imageData.url);
+      setImageUrl(imageData.image_url);
       setImageTitle(imageData.title);
     } else {
       setImageUrl("");
@@ -69,14 +69,14 @@ const PortfolioModal = ({
         // Handle editing
         await handleEdit({
           id: imageData.id,
-          url: imageUrl,
+          image_url: imageUrl,
           title: imageTitle,
         });
       } else {
         // Handle adding new image
         await handleAddImage({
           id: "",
-          url: imageUrl,
+          image_url: imageUrl,
           title: imageTitle,
         });
       }
@@ -92,7 +92,7 @@ const PortfolioModal = ({
     try {
       const res = await addPortfolioImage({
         id: image.id,
-        url: image.url,
+        image_url: image.image_url,
         title: image.title || "Portfolio",
       });
 
@@ -112,6 +112,12 @@ const PortfolioModal = ({
   };
 
   const handleDelete = async (id: string) => {
+    // confirm if the user wants to delete the image
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this image? This action cannot be undone."
+    );
+    if (!confirmDelete) return;
+
     setSubmitting(true);
 
     try {
@@ -141,7 +147,7 @@ const PortfolioModal = ({
     }
 
     // if the text is same of empty then show error message
-    if (!image.url) {
+    if (!image.image_url) {
       toast.error("Missing information", {
         description: "Please provide both image URL and title",
       });
@@ -149,7 +155,10 @@ const PortfolioModal = ({
     }
 
     // Check if the image URL is the same as before
-    if (image.url === imageData.url && image.title === imageData.title) {
+    if (
+      image.image_url === imageData.image_url &&
+      image.title === imageData.title
+    ) {
       toast.error("No changes made", {
         description: "Please make changes to the image URL or title",
       });
