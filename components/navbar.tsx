@@ -91,7 +91,7 @@ const Navbar = () => {
         className={`fixed inset-0 bg-primary/80 backdrop-blur-sm z-10 transition-opacity duration-300 ease-in-out md:hidden
           ${isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsMenuOpen(false)}
-      ></div>
+      />
       <div
         className={`absolute top-28 left-4 right-4 bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg z-20 transition-all duration-300 ease-in-out transform md:hidden
           ${

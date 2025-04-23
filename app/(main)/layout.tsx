@@ -60,9 +60,6 @@ export const metadata: Metadata = {
     apple: [{ url: "/favicon.png" }],
   },
   manifest: "/site.webmanifest",
-  // verification: {
-  //   google: "your-google-verification-code",
-  // },
 };
 
 export default function RootLayout({

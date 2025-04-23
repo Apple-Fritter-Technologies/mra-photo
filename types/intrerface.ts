@@ -10,9 +10,16 @@ export interface ImageHeaderProps {
   title: string;
 }
 
+// Add or update the User interface
 export interface User {
+  id?: string;
   email: string;
-  password: string;
+  password?: string;
+  name?: string | null;
+  phone?: string | null;
+  role?: string;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface PortfolioImage {

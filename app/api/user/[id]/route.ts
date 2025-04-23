@@ -3,8 +3,14 @@ import { verifyAuth } from "@/lib/server-service";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
-// GET - Get all users
-export async function GET(req: NextRequest) {
+interface Params {
+  params: {
+    id: string;
+  };
+}
+
+// GET - Get a single user by ID
+export async function GET(req: NextRequest, { params }: Params) {
   try {
     // Verify authentication
     const auth = await verifyAuth(req);
@@ -12,16 +18,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
-    // Check if the user has admin role
-    if (auth?.user?.role !== "admin") {
+    const id = params.id;
+
+    // Users can view their own data, admins can view anyone's data
+    if (auth.user?.role !== "admin" && auth.user?.id !== id) {
       return NextResponse.json(
-        { error: "Unauthorized: Admin access required" },
+        {
+          error:
+            "Unauthorized: You can only access your own account or have admin access",
+        },
         { status: 403 }
       );
     }
 
-    // Get all users (excluding passwords)
-    const users = await prisma.user.findMany({
+    // Get user by ID (excluding password)
+    const user = await prisma.user.findUnique({
+      where: { id },
       select: {
         id: true,
         email: true,
@@ -33,75 +45,21 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(users, { status: 200 });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch users" },
+      { error: "Failed to fetch user" },
       { status: 500 }
     );
   }
 }
 
-// POST - Create a new user
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { email, password, name, phone } = body;
-
-    // Validate required fields
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
-    }
-
-    // Check if user with same email exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "A user with this email already exists" },
-        { status: 400 }
-      );
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        phone,
-        role: "user",
-      },
-    });
-
-    // Return user without password
-    const userWithoutPassword = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-    };
-
-    return NextResponse.json(userWithoutPassword, { status: 201 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to create user" },
-      { status: 500 }
-    );
-  }
-}
-
-// PATCH - Update a user (requires admin authentication)
-export async function PATCH(req: NextRequest) {
+// PATCH - Update a specific user
+export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     // Verify authentication
     const auth = await verifyAuth(req);
@@ -109,15 +67,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
+    const id = params.id;
 
     // Check if the user has admin role or is updating their own record
     if (auth.user?.role !== "admin" && auth.user?.id !== id) {
@@ -143,7 +93,7 @@ export async function PATCH(req: NextRequest) {
     const { email, password, name, phone, role } = body;
 
     // Prevent role change unless admin
-    if (role && auth.user.role !== "admin") {
+    if (role && auth.user?.role !== "admin") {
       return NextResponse.json(
         { error: "Only admins can change user roles" },
         { status: 403 }
@@ -174,9 +124,11 @@ export async function PATCH(req: NextRequest) {
 
     // Prepare update data
     const updateData: any = {};
-    if (role && auth.user.role === "admin") updateData.role = role;
-    if (name) updateData.name = name;
-    if (phone) updateData.phone = phone;
+    if (email) updateData.email = email;
+    if (name !== undefined) updateData.name = name;
+    if (phone !== undefined) updateData.phone = phone;
+    if (role && auth.user?.role === "admin") updateData.role = role;
+
     // Hash password if provided
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
@@ -189,15 +141,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     // Return user without password
-
-    const userWithoutPassword = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-      phone: updatedUser.phone,
-      role: updatedUser.role,
-    };
-
+    const { password: _, ...userWithoutPassword } = updatedUser;
     return NextResponse.json(userWithoutPassword, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -207,8 +151,8 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// DELETE - Delete a user (requires admin authentication)
-export async function DELETE(req: NextRequest) {
+// DELETE - Delete a specific user
+export async function DELETE(req: NextRequest, { params }: Params) {
   try {
     // Verify authentication
     const auth = await verifyAuth(req);
@@ -224,15 +168,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
+    const id = params.id;
 
     // Don't allow deleting the last admin
     const adminCount = await prisma.user.count({

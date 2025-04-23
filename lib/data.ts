@@ -7,6 +7,7 @@ import {
   Home,
   Image,
   PackageIcon,
+  User,
 } from "lucide-react";
 
 export const navigation = [
@@ -35,6 +36,10 @@ export const navigation = [
     name: "Inquire",
     href: "/inquire",
   },
+  {
+    name: "Login",
+    href: "/login",
+  },
 ];
 
 export const adminNavItems = [
@@ -62,6 +67,11 @@ export const adminNavItems = [
     href: "/admin/dashboard/bookings",
     icon: Calendar,
     label: "Bookings",
+  },
+  {
+    href: "/admin/dashboard/users",
+    icon: User,
+    label: "Users",
   },
 ];
 
@@ -95,6 +105,12 @@ export const dashboardQuickAction = [
     icon: GalleryHorizontalEnd,
     label: "Manage Carousel",
     href: "/admin/dashboard/carousel",
+    color: "bg-purple-500/10 text-purple-500",
+  },
+  {
+    icon: User,
+    label: "Manage Users",
+    href: "/admin/dashboard/users",
     color: "bg-purple-500/10 text-purple-500",
   },
 ];

@@ -3,7 +3,6 @@ import { verifyAuth } from "@/lib/server-service";
 
 import { NextRequest, NextResponse } from "next/server";
 
-// get the total number of portfolios and the total number of users and the total number of bookings and upcoming bookings
 export async function GET(req: NextRequest) {
   try {
     // Verify authentication

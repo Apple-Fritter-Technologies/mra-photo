@@ -3,9 +3,16 @@
 import { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { User } from "@/types/intrerface";
+
+interface AuthResponse {
+  authorized: boolean;
+  user?: User;
+  error?: string;
+}
 
 // Verify JWT authentication middleware
-export const verifyAuth = async (req: NextRequest) => {
+export const verifyAuth = async (req: NextRequest): Promise<AuthResponse> => {
   const authHeader = req.headers.get("Authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -16,7 +23,10 @@ export const verifyAuth = async (req: NextRequest) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    return { authorized: true, user: decoded };
+
+    console.log("Decoded JWT:", decoded);
+
+    return { authorized: true, user: decoded as User };
   } catch (error) {
     return { authorized: false, error: "Invalid or expired token" };
   }

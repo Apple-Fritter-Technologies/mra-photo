@@ -103,7 +103,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <Button
@@ -138,8 +138,39 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
+      {/* Quick Actions */}
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        transition={{ delay: 0.4 }}
+        className="lg:col-span-1"
+      >
+        <Card className="h-full shadow-md shadow-muted/10 border-none hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle className="text-xl">Quick Actions</CardTitle>
+            <CardDescription>Common tasks and shortcuts</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-4 w-full">
+            {dashboardQuickAction.map((action, i) => (
+              <Link key={i} href={action.href} className="flex-1">
+                <div className="group flex items-center justify-between p-4 rounded-xl border border-muted bg-card hover:bg-accent/50 transition-colors gap-2">
+                  <div className="flex items-center gap-4">
+                    <div className={`${action.color} p-3 rounded-lg`}>
+                      {<action.icon size={20} />}
+                    </div>
+                    <span className="font-medium">{action.label}</span>
+                  </div>
+                  <ArrowUpRightIcon className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.title}
@@ -173,37 +204,6 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
-
-      {/* Quick Actions */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        transition={{ delay: 0.4 }}
-        className="lg:col-span-1"
-      >
-        <Card className="h-full shadow-md shadow-muted/10 border-none hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <CardTitle className="text-xl">Quick Actions</CardTitle>
-            <CardDescription>Common tasks and shortcuts</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-4 w-full">
-            {dashboardQuickAction.map((action, i) => (
-              <Link key={i} href={action.href} className="flex-1">
-                <div className="group flex items-center justify-between p-4 rounded-xl border border-muted bg-card hover:bg-accent/50 transition-colors gap-2">
-                  <div className="flex items-center gap-4">
-                    <div className={`${action.color} p-3 rounded-lg`}>
-                      {<action.icon size={20} />}
-                    </div>
-                    <span className="font-medium">{action.label}</span>
-                  </div>
-                  <ArrowUpRightIcon className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   );
 }

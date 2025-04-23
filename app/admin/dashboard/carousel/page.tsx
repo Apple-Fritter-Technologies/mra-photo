@@ -12,7 +12,12 @@ import { Loader2, GripVertical, Pencil, Plus } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
 import CarouselModal from "../../components/carousel-modal";
 
 const CarouselPage = () => {
@@ -42,7 +47,7 @@ const CarouselPage = () => {
     }
   };
 
-  const handleDragEnd = async (result: any) => {
+  const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
     const items = Array.from(images);
