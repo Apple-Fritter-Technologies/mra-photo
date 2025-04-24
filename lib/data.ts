@@ -10,7 +10,36 @@ import {
   User,
 } from "lucide-react";
 
-export const navigation = [
+export const navItems = [
+  {
+    name: "Home",
+    href: "/",
+  },
+  {
+    name: "Meet Maria",
+    href: "/meet-maria",
+  },
+
+  {
+    name: "Portfolio",
+    href: "/portfolio",
+  },
+  {
+    name: "Investment",
+    href: "/investment",
+  },
+
+  {
+    name: "Inquire",
+    href: "/inquire",
+  },
+  {
+    name: "Login",
+    href: "/login",
+  },
+];
+
+export const allHomeNavigation = [
   {
     name: "Home",
     href: "/",
@@ -31,7 +60,6 @@ export const navigation = [
     name: "Investment",
     href: "/investment",
   },
-
   {
     name: "Inquire",
     href: "/inquire",

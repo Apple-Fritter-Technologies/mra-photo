@@ -27,7 +27,7 @@ export function useMediaQuery(query: string) {
 }
 
 export const userLogout = async () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("user-data");
 
   const res = await removeSessionToken();
   if (!res) {

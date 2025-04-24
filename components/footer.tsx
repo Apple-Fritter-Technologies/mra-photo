@@ -1,10 +1,25 @@
+"use client";
+
 import Image from "next/image";
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
-import { navigation } from "@/lib/data";
+
 import { Facebook, Instagram, Mail, ChevronRight } from "lucide-react";
+import { allHomeNavigation } from "@/lib/data";
+import { useUserStore } from "@/store/use-user";
 
 const Footer = () => {
+  const { token } = useUserStore();
+
+  const footerNavigation = useMemo(() => {
+    if (token) {
+      return allHomeNavigation
+        .filter((item) => item.name !== "Login")
+        .concat([{ name: "Account", href: "/account" }]);
+    }
+    return allHomeNavigation;
+  }, [token]);
+
   return (
     <footer className="bg-gradient-to-b from-primary to-primary/95 pt-12 pb-0 relative overflow-hidden">
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
@@ -44,7 +59,7 @@ const Footer = () => {
               </span>
             </h3>
             <nav className="flex flex-col space-y-3 w-full max-w-[200px]">
-              {navigation.map((item) => (
+              {footerNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}

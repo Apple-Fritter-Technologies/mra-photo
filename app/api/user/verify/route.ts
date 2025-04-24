@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import { User } from "@/types/intrerface";
 
 export async function POST(req: Request) {
   try {
@@ -16,15 +17,18 @@ export async function POST(req: Request) {
       const decoded = (await jwt.verify(
         token,
         process.env.JWT_SECRET as string
-      )) as { userId: string; email: string };
+      )) as User;
 
       // Don't return the full user data for security reasons
       return NextResponse.json(
         {
           authorized: true,
           user: {
-            userId: decoded.userId,
+            id: decoded.id,
             email: decoded.email,
+            name: decoded.name,
+            phone: decoded.phone,
+            role: decoded.role,
           },
         },
         { status: 200 }

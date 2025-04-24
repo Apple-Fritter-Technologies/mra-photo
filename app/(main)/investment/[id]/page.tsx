@@ -5,19 +5,34 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import {
   Loader2,
-  Calendar,
   Clock,
   Image as ImageIcon,
   ArrowLeft,
   Check,
+  CalendarIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import ImageHeader from "@/components/image-header";
 import PageTitle from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/intrerface";
 import { getProducts } from "@/lib/actions/product-action";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import ProductCard from "@/components/product-card";
 
 const ProductDetailPage = () => {
   const router = useRouter();
@@ -25,9 +40,13 @@ const ProductDetailPage = () => {
   const id = params.id as string;
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -50,6 +69,9 @@ const ProductDetailPage = () => {
         }
 
         setProduct(foundProduct);
+
+        const recommendations = response.filter((p: Product) => p.id !== id);
+        setRecommendedProducts(recommendations);
       } catch (error) {
         setError(true);
         toast.error(
@@ -66,16 +88,45 @@ const ProductDetailPage = () => {
   }, [id]);
 
   const handlePayment = async () => {
+    if (!selectedDate) {
+      toast.error("Please select a date for your session", {
+        description: "A session date is required to proceed with booking",
+      });
+      return;
+    }
+
+    if (!selectedTime) {
+      toast.error("Please select a time for your session", {
+        description:
+          "A preferred time slot is required to proceed with booking",
+      });
+      return;
+    }
+
     setPaymentLoading(true);
 
     try {
+      // Validate date and time selection
+      if (!selectedDate) {
+        toast.error("Please select a date for your session");
+        setPaymentLoading(false);
+        return;
+      }
+
+      if (!selectedTime) {
+        toast.error("Please select a time for your session");
+        setPaymentLoading(false);
+        return;
+      }
+
       // Mock integration with Square payment
-      // In a real implementation, this would redirect to Square checkout or open a Square payment form
       toast.success("Redirecting to payment gateway...");
 
-      // Simulating redirect to prevent immediate call
+      // Pass date and time as query parameters
       setTimeout(() => {
-        router.push(`/inquire?package=${id}`);
+        router.push(
+          `/inquire?package=${id}&date=${selectedDate.toISOString()}&time=${selectedTime}`
+        );
       }, 1500);
     } catch (error) {
       toast.error("Failed to initiate payment");
@@ -86,6 +137,24 @@ const ProductDetailPage = () => {
 
   const handleGoBack = () => {
     router.push("/investment");
+  };
+
+  const handleRedirectToInquire = () => {
+    // Start with the base URL including the package
+    let inquireUrl = `/inquire?package=${id}`;
+
+    // Add date parameter if a date has been selected
+    if (selectedDate) {
+      inquireUrl += `&date=${selectedDate.toISOString()}`;
+    }
+
+    // Add time parameter if a time has been selected
+    if (selectedTime) {
+      inquireUrl += `&time=${selectedTime}`;
+    }
+
+    // Navigate to the inquiry page with all available parameters
+    router.push(inquireUrl);
   };
 
   if (loading) {
@@ -113,8 +182,6 @@ const ProductDetailPage = () => {
 
   return (
     <div className="container mx-auto px-4 flex flex-col gap-8 pb-16">
-      <ImageHeader img={product.image_url} title={product.title} />
-
       <Button
         variant="ghost"
         className="w-fit flex items-center gap-2"
@@ -133,6 +200,7 @@ const ProductDetailPage = () => {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
+            quality={100}
           />
         </div>
 
@@ -191,10 +259,73 @@ const ProductDetailPage = () => {
             </ul>
           </div>
 
+          <div className="space-y-4 py-4 border-y border-gray-200">
+            <h3 className="text-xl font-semibold">
+              Select Session Date & Time
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Session Date <span className="text-red-500">*</span>
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate
+                        ? format(selectedDate, "PPP")
+                        : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Preferred Time <span className="text-red-500">*</span>
+                </label>
+                <Select value={selectedTime} onValueChange={setSelectedTime}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="morning">
+                      Morning (8am - 12pm)
+                    </SelectItem>
+                    <SelectItem value="afternoon">
+                      Afternoon (12pm - 4pm)
+                    </SelectItem>
+                    <SelectItem value="evening">
+                      Evening (Golden Hour)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-4 mt-4">
             <Button
               size="lg"
-              className="w-full py-6 text-xl bg-secondary hover:bg-secondary/90 text-white"
+              className="w-full py-6 text-xl bg-secondary hover:bg-primary text-white"
               onClick={handlePayment}
               disabled={paymentLoading}
             >
@@ -212,7 +343,8 @@ const ProductDetailPage = () => {
               variant="outline"
               size="lg"
               className="w-full py-6 text-xl"
-              onClick={() => router.push(`/inquire?package=${id}`)}
+              onClick={handleRedirectToInquire}
+              disabled={paymentLoading}
             >
               Inquire About This Package
             </Button>
@@ -252,6 +384,20 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Recommended Products Section */}
+      {recommendedProducts.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            You Might Also Like
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recommendedProducts.map((pkg) => (
+              <ProductCard key={pkg.id} pkg={pkg} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

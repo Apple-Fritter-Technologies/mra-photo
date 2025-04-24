@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -27,18 +26,21 @@ import {
 } from "lucide-react";
 import { loginUser, verifyUserToken } from "@/lib/actions/user-action";
 import { toast } from "sonner";
-import { useLocalStorage } from "usehooks-ts";
+import ForgotPasswordModal from "@/components/forgot-password-modal";
+import { useUserStore } from "@/store/use-user";
 
 const UserLoginPage = () => {
   const router = useRouter();
+
+  const { token, setToken, logout, setUser } = useUserStore();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-
-  const [token, setToken, removeToken] = useLocalStorage("token", "");
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +56,14 @@ const UserLoginPage = () => {
     try {
       const res = await loginUser({ email, password });
 
+      console.log("Login response:", res);
+
       if (res.error) {
         setError(true);
         toast.error("Invalid email or password");
       } else {
         setToken(res.token);
+        setUser(res.user);
         toast.success("Login successful!");
 
         // Redirect based on user role
@@ -93,7 +98,7 @@ const UserLoginPage = () => {
           }
           return;
         } else {
-          removeToken();
+          await logout();
 
           if (res.error) {
             toast.error("Session expired", {
@@ -103,7 +108,7 @@ const UserLoginPage = () => {
         }
       } catch (error) {
         toast.error("Token verification failed. Please log in again.");
-        removeToken();
+        await logout();
       }
     }
     setIsCheckingAuth(false);
@@ -188,12 +193,13 @@ const UserLoginPage = () => {
                   <Label htmlFor="password" className="text-sm font-medium">
                     Password
                   </Label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs text-primary hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => setForgotPasswordOpen(true)}
+                    className="text-xs text-secondary hover:underline"
                   >
                     Forgot password?
-                  </Link>
+                  </button>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -254,6 +260,13 @@ const UserLoginPage = () => {
           </CardFooter>
         </Card>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={forgotPasswordOpen}
+        onClose={() => setForgotPasswordOpen(false)}
+        initialEmail={email}
+      />
     </div>
   );
 };

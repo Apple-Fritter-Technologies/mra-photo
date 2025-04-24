@@ -21,12 +21,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Loader2, UserIcon } from "lucide-react";
+import { CalendarIcon, Link2, Loader2, UserIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createBooking } from "@/lib/actions/booking-action";
 import { Booking, Product } from "@/types/intrerface";
 import { getProducts } from "@/lib/actions/product-action";
@@ -57,6 +57,8 @@ const initialFormState: FormState = {
 };
 
 function InquireFormWithSearchParams() {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const img = "/images/inquire-header.jpg";
 
@@ -67,7 +69,7 @@ function InquireFormWithSearchParams() {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Fetch sessions once on component mount
+  // Modify the fetchSessions function to handle date and time params
   const fetchSessions = async () => {
     setLoading(true);
     try {
@@ -101,6 +103,42 @@ function InquireFormWithSearchParams() {
                 sessionId: matchedSession.id,
               }));
             }
+          }
+
+          // Handle date from URL if provided
+          const dateFromUrl = searchParams.get("date");
+          if (dateFromUrl) {
+            try {
+              const parsedDate = new Date(dateFromUrl);
+              // Validate that the date is in the future
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+
+              if (parsedDate >= today) {
+                setFormState((prev) => ({
+                  ...prev,
+                  date: parsedDate,
+                }));
+              } else {
+                // If date is in the past, don't use it
+                toast.error("Selected date must be in the future");
+              }
+            } catch (e) {
+              // If date parsing fails, ignore it
+              console.error("Invalid date format in URL parameters");
+            }
+          }
+
+          // Handle time from URL if provided
+          const timeFromUrl = searchParams.get("time");
+          if (
+            timeFromUrl &&
+            ["morning", "afternoon", "evening"].includes(timeFromUrl)
+          ) {
+            setFormState((prev) => ({
+              ...prev,
+              preferredTime: timeFromUrl,
+            }));
           }
         }
       }
@@ -335,6 +373,16 @@ function InquireFormWithSearchParams() {
                               required
                             />
                             {session.title}
+
+                            <Button
+                              variant="ghost"
+                              className="ml-auto text-secondary hover:text-secondary/80"
+                              onClick={() => {
+                                router.push(`/investment/${session.id}`);
+                              }}
+                            >
+                              <Link2 className="h-4 w-4 text-secondary" />
+                            </Button>
                           </Label>
                         ))}
                       </RadioGroup>

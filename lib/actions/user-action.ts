@@ -184,10 +184,10 @@ export const logoutUser = async () => {
 };
 
 // Get current user profile
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (id: string) => {
   try {
     const authAxios = await createAuthenticatedRequest();
-    const res = await authAxios.get(`${ApiUrl}/api/user/profile`);
+    const res = await authAxios.get(`${ApiUrl}/api/user/${id}`);
     return res.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -272,5 +272,26 @@ export const checkIsAdmin = async () => {
     return { isAdmin: authStatus.user.role === "admin" };
   } catch (error) {
     return { isAdmin: false };
+  }
+};
+
+// Request password reset
+export const forgotPassword = async (email: string) => {
+  try {
+    const res = await axios.post(`${ApiUrl}/api/user/forgot-password`, {
+      email,
+    });
+    return res.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return {
+        error:
+          error.response?.data?.error ||
+          "Failed to process password reset request. Please try again.",
+      };
+    }
+    return {
+      error: "Failed to process password reset request. Please try again.",
+    };
   }
 };

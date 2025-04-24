@@ -18,32 +18,10 @@ export async function GET(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
-    const id = params.id;
-
-    // Users can view their own data, admins can view anyone's data
-    if (auth.user?.role !== "admin" && auth.user?.id !== id) {
-      return NextResponse.json(
-        {
-          error:
-            "Unauthorized: You can only access your own account or have admin access",
-        },
-        { status: 403 }
-      );
-    }
+    const id = (await params).id;
 
     // Get user by ID (excluding password)
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-        created_at: true,
-        updated_at: true,
-      },
-    });
+    const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

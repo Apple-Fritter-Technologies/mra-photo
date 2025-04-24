@@ -5,15 +5,17 @@ import AppHeader from "../components/layout/app-header";
 import Footer from "@/components/footer";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 import { verifyUserToken } from "@/lib/actions/user-action";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useUserStore } from "@/store/use-user";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-  const [token, setToken, removeToken] = useLocalStorage("token", "");
+  const { token, logout, setToken } = useUserStore();
+
+  console.log("Token from store:", token);
 
   const checkAuthStatus = async () => {
     setIsCheckingAuth(true);
@@ -23,19 +25,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         const res = await verifyUserToken(token);
 
         if (!res.authorized) {
-          removeToken();
           toast.error("Session expired. Please log in again.");
-          router.push("/admin/login");
+          await logout();
+          router.push("/login");
         } else {
           setToken(token);
         }
       } catch (error) {
         toast.error("Token verification failed. Please log in again.");
-        removeToken();
+        await logout();
       }
     } else {
       toast.error("Token not found. Please log in.");
-      router.push("/admin/login");
+      await logout();
+      router.push("/login");
     }
     setIsCheckingAuth(false);
   };
