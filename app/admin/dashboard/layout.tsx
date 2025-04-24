@@ -5,46 +5,59 @@ import AppHeader from "../components/layout/app-header";
 import Footer from "@/components/footer";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { verifyUserToken } from "@/lib/actions/user-action";
+import { verifyUserToken, getAuthToken } from "@/lib/actions/user-action";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useUserStore } from "@/store/use-user";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-  const { token, logout, setToken } = useUserStore();
-
-  console.log("Token from store:", token);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { token, setToken, logout } = useUserStore();
 
   const checkAuthStatus = async () => {
     setIsCheckingAuth(true);
 
-    if (token) {
-      try {
-        const res = await verifyUserToken(token);
+    try {
+      const cookieToken = await getAuthToken();
 
-        if (!res.authorized) {
+      if (cookieToken && !token) {
+        setToken(cookieToken);
+      }
+
+      const tokenToVerify = token || cookieToken;
+
+      if (tokenToVerify) {
+        const res = await verifyUserToken(tokenToVerify);
+
+        if (res.authorized) {
+          if (!token) {
+            setToken(tokenToVerify);
+          }
+        } else {
+          // Token is invalid
           toast.error("Session expired. Please log in again.");
           await logout();
           router.push("/login");
-        } else {
-          setToken(token);
         }
-      } catch (error) {
-        toast.error("Token verification failed. Please log in again.");
-        await logout();
+      } else {
+        // No token found anywhere
+        toast.error("Authentication required. Please log in.");
+        router.push("/login");
       }
-    } else {
-      toast.error("Token not found. Please log in.");
+    } catch (error) {
+      console.error("Auth verification error:", error);
+      toast.error("Authentication error. Please log in again.");
       await logout();
       router.push("/login");
+    } finally {
+      setIsCheckingAuth(false);
     }
-    setIsCheckingAuth(false);
   };
 
   useEffect(() => {
     checkAuthStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isCheckingAuth) {
