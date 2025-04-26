@@ -68,6 +68,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate password complexity
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters long" },
+        { status: 400 }
+      );
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -95,113 +103,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to create user" },
-      { status: 500 }
-    );
-  }
-}
-
-// PATCH - Update a user (requires admin authentication)
-export async function PATCH(req: NextRequest) {
-  try {
-    // Verify authentication
-    const auth = await verifyAuth(req);
-    if (!auth.authorized) {
-      return NextResponse.json({ error: auth.error }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Check if the user has admin role or is updating their own record
-    if (auth.user?.role !== "admin" && auth.user?.id !== id) {
-      return NextResponse.json(
-        {
-          error:
-            "Unauthorized: You can only update your own account or have admin access",
-        },
-        { status: 403 }
-      );
-    }
-
-    // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { id },
-    });
-
-    if (!existingUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const body = await req.json();
-    const { email, password, name, phone, role } = body;
-
-    // Prevent role change unless admin
-    if (role && auth.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Only admins can change user roles" },
-        { status: 403 }
-      );
-    }
-
-    // Validate role if provided
-    if (role && !["admin", "user"].includes(role)) {
-      return NextResponse.json(
-        { error: "Invalid role. Role must be 'admin' or 'user'" },
-        { status: 400 }
-      );
-    }
-
-    // Check if email exists for another user if email is being changed
-    if (email && email !== existingUser.email) {
-      const emailExists = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (emailExists) {
-        return NextResponse.json(
-          { error: "Email is already in use" },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Prepare update data
-    const updateData: any = {};
-    if (role && auth.user.role === "admin") updateData.role = role;
-    if (name) updateData.name = name;
-    if (phone) updateData.phone = phone;
-    // Hash password if provided
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 10);
-    }
-
-    // Update user
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: updateData,
-    });
-
-    // Return user without password
-
-    const userWithoutPassword = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-      phone: updatedUser.phone,
-      role: updatedUser.role,
-    };
-
-    return NextResponse.json(userWithoutPassword, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to update user" },
       { status: 500 }
     );
   }

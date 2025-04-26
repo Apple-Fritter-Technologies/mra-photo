@@ -5,13 +5,13 @@ import { useUserStore } from "@/store/use-user";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import { User, LogOut } from "lucide-react";
+
+import UserDropdown from "./user-dropdown";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const { token, logout } = useUserStore();
+  const { token } = useUserStore();
 
   // Filter navigation items to exclude Login when user is logged in
   const navigation = token
@@ -22,11 +22,6 @@ const Navbar = () => {
   const midpoint = Math.ceil(navigation.length / 2);
   const leftNavigation = navigation.slice(0, midpoint);
   const rightNavigation = navigation.slice(midpoint);
-
-  const handleLogout = () => {
-    logout();
-    setIsUserMenuOpen(false);
-  };
 
   return (
     <div className="flex justify-center w-full mx-auto items-center px-4 md:pt-8 pt-4 gap-6 fixed top-0 z-50">
@@ -70,7 +65,7 @@ const Navbar = () => {
           </div>
         </button>
 
-        <div className="hidden md:flex gap-6">
+        <div className="hidden md:flex gap-6 items-center">
           {/* Desktop navigation */}
           <div className="flex gap-6">
             {leftNavigation.map((item) => (
@@ -99,41 +94,7 @@ const Navbar = () => {
             ))}
 
             {/* User icon with dropdown when logged in */}
-            {token && (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                >
-                  <User size={16} className="text-gray-700" />
-                </button>
-
-                {/* User dropdown menu */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    <Link
-                      href="/account"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <User size={16} />
-                        <span>My Account</span>
-                      </div>
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <div className="flex items-center gap-2">
-                        <LogOut size={16} />
-                        <span>Logout</span>
-                      </div>
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+            {token && <UserDropdown />}
           </div>
         </div>
       </div>
@@ -165,29 +126,7 @@ const Navbar = () => {
           ))}
 
           {/* Mobile user account options */}
-          {token && (
-            <>
-              <Link
-                href="/account"
-                className="text-gray-900 hover:text-secondary font-medium px-4 py-2 rounded-md hover:bg-gray-100"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="flex items-center gap-2">
-                  <User size={16} />
-                  <span>My Account</span>
-                </div>
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-left text-gray-900 hover:text-secondary font-medium px-4 py-2 rounded-md hover:bg-gray-100 w-full"
-              >
-                <div className="flex items-center gap-2">
-                  <LogOut size={16} />
-                  <span>Logout</span>
-                </div>
-              </button>
-            </>
-          )}
+          {token && <UserDropdown />}
         </div>
       </div>
     </div>

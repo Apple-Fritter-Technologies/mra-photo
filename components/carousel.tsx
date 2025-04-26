@@ -15,6 +15,7 @@ import { CarouselImage } from "@/types/intrerface";
 import { fetchCarouselImages } from "@/lib/actions/carousel-actions";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Carousel = () => {
   const [images, setImages] = useState<CarouselImage[]>([]);
@@ -44,8 +45,10 @@ const Carousel = () => {
     setLoading(true);
     try {
       const res = await fetchCarouselImages();
+
       if (res.error) {
         setError(true);
+        toast.error(res.error);
       } else {
         setImages(res);
       }
@@ -279,7 +282,7 @@ const Carousel = () => {
     <>
       {error && (
         <div className="text-red-500 text-center py-4 bg-muted/50 rounded-lg">
-          <p>Error fetching products. Please try again.</p>
+          <p>Error fetching images. Please try again.</p>
           <Button
             variant="outline"
             className="mt-4"

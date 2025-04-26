@@ -5,6 +5,36 @@ import axios from "axios";
 import { ApiUrl } from "../utils";
 import { cookies } from "next/headers";
 
+// Get the auth token from cookies
+export const getAuthToken = async () => {
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("auth_token");
+  return token?.value;
+};
+
+// Add auth header to requests
+const createAuthenticatedRequest = async () => {
+  const token = await getAuthToken();
+  return axios.create({
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// Logout user
+export const logoutUser = async () => {
+  try {
+    // Remove the auth token cookie
+    (await cookies()).delete("auth_token");
+    return { success: true };
+  } catch (error) {
+    return {
+      error: "Failed to logout",
+    };
+  }
+};
+
 export const loginUser = async ({ email, password }: User) => {
   try {
     const res = await axios.post(`${ApiUrl}/api/user/login`, {
@@ -60,23 +90,6 @@ export const verifyUserToken = async (token: string) => {
   }
 };
 
-// Get the auth token from cookies
-export const getAuthToken = async () => {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("auth_token");
-  return token?.value;
-};
-
-// Add auth header to requests
-const createAuthenticatedRequest = async () => {
-  const token = await getAuthToken();
-  return axios.create({
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
-
 // Create a new user
 export const createUser = async (user: User) => {
   try {
@@ -116,24 +129,6 @@ export const getAllUsers = async () => {
   }
 };
 
-// Get user by ID
-export const getUserById = async (id: string) => {
-  try {
-    const authAxios = await createAuthenticatedRequest();
-    const res = await authAxios.get(`${ApiUrl}/api/user/${id}`);
-    return res.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      return {
-        error: error.response?.data?.error || "Failed to fetch user",
-      };
-    }
-    return {
-      error: "Failed to fetch user",
-    };
-  }
-};
-
 // Update user
 export const updateUser = async (id: string, userData: Partial<User>) => {
   try {
@@ -156,7 +151,7 @@ export const updateUser = async (id: string, userData: Partial<User>) => {
 export const deleteUser = async (id: string) => {
   try {
     const authAxios = await createAuthenticatedRequest();
-    const res = await authAxios.delete(`${ApiUrl}/api/user/${id}`);
+    const res = await authAxios.delete(`${ApiUrl}/api/user?id=${id}`);
     return res.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -166,37 +161,6 @@ export const deleteUser = async (id: string) => {
     }
     return {
       error: "Failed to delete user",
-    };
-  }
-};
-
-// Logout user
-export const logoutUser = async () => {
-  try {
-    // Remove the auth token cookie
-    (await cookies()).delete("auth_token");
-    return { success: true };
-  } catch (error) {
-    return {
-      error: "Failed to logout",
-    };
-  }
-};
-
-// Get current user profile
-export const getCurrentUser = async (id: string) => {
-  try {
-    const authAxios = await createAuthenticatedRequest();
-    const res = await authAxios.get(`${ApiUrl}/api/user/${id}`);
-    return res.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      return {
-        error: error.response?.data?.error || "Failed to fetch user profile",
-      };
-    }
-    return {
-      error: "Failed to fetch user profile",
     };
   }
 };
@@ -225,56 +189,6 @@ export const updatePassword = async (
   }
 };
 
-// Create a new user (admin only)
-export const createUserAsAdmin = async (userData: User) => {
-  try {
-    const authAxios = await createAuthenticatedRequest();
-    const res = await authAxios.post(`${ApiUrl}/api/user`, userData);
-    return res.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      return {
-        error:
-          error.response?.data?.error ||
-          "User creation failed. Please check your details.",
-      };
-    }
-    return {
-      error: "User creation failed. Please check your details.",
-    };
-  }
-};
-
-// Check if user is authenticated
-export const checkAuth = async () => {
-  try {
-    const token = await getAuthToken();
-    if (!token) {
-      return { authenticated: false };
-    }
-
-    const authAxios = await createAuthenticatedRequest();
-    const res = await authAxios.get(`${ApiUrl}/api/user/check`);
-    return { authenticated: true, user: res.data };
-  } catch (error) {
-    return { authenticated: false };
-  }
-};
-
-// Check if user is admin
-export const checkIsAdmin = async () => {
-  try {
-    const authStatus = await checkAuth();
-    if (!authStatus.authenticated || !authStatus.user) {
-      return { isAdmin: false };
-    }
-
-    return { isAdmin: authStatus.user.role === "admin" };
-  } catch (error) {
-    return { isAdmin: false };
-  }
-};
-
 // Request password reset
 export const forgotPassword = async (email: string) => {
   try {
@@ -292,6 +206,47 @@ export const forgotPassword = async (email: string) => {
     }
     return {
       error: "Failed to process password reset request. Please try again.",
+    };
+  }
+};
+
+// Verify reset token
+export const verifyResetToken = async (token: string) => {
+  try {
+    const res = await axios.post(`${ApiUrl}/api/user/verify-reset-token`, {
+      token,
+    });
+    return res.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return {
+        valid: false,
+        error: error.response?.data?.error || "Invalid or expired token",
+      };
+    }
+    return {
+      valid: false,
+      error: "Invalid or expired token",
+    };
+  }
+};
+
+// Reset password with token
+export const resetPassword = async (token: string, password: string) => {
+  try {
+    const res = await axios.post(`${ApiUrl}/api/user/reset-password`, {
+      token,
+      password,
+    });
+    return res.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return {
+        error: error.response?.data?.error || "Failed to reset password",
+      };
+    }
+    return {
+      error: "Failed to reset password",
     };
   }
 };

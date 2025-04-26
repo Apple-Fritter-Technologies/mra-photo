@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -24,11 +24,16 @@ import {
   Phone,
   ArrowLeft,
 } from "lucide-react";
-import { createUser } from "@/lib/actions/user-action";
+import {
+  createUser,
+  getAuthToken,
+  verifyUserToken,
+} from "@/lib/actions/user-action";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useUserStore } from "@/store/use-user";
 
 // Validation schema
 const registerSchema = z
@@ -36,7 +41,7 @@ const registerSchema = z
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().optional(),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -48,9 +53,13 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterPage = () => {
   const router = useRouter();
+
+  const { token, setToken, logout } = useUserStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -62,6 +71,37 @@ const RegisterPage = () => {
       confirmPassword: "",
     },
   });
+
+  const checkAuthStatus = async () => {
+    setIsCheckingAuth(true);
+
+    try {
+      const cookieToken = await getAuthToken();
+
+      if (cookieToken && !token) {
+        setToken(cookieToken);
+      }
+
+      const tokenToVerify = token || cookieToken;
+
+      if (tokenToVerify) {
+        const res = await verifyUserToken(tokenToVerify);
+
+        if (res.authorized) {
+          router.push("/");
+        }
+      }
+    } catch (error) {
+      toast.error("Authentication error. Please log in again.");
+      await logout();
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
@@ -85,9 +125,22 @@ const RegisterPage = () => {
     }
   };
 
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-slate-500 dark:text-slate-400">
+            Checking authentication...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary mb-3">
             <Camera className="h-8 w-8 text-secondary" />
@@ -197,7 +250,7 @@ const RegisterPage = () => {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     className="pl-10 pr-10"
-                    placeholder="Min. 6 characters"
+                    placeholder="Min. 8 characters"
                     {...form.register("password")}
                     disabled={isLoading}
                   />

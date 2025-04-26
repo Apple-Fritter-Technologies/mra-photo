@@ -36,10 +36,13 @@ export async function POST(req: Request) {
     // Generate JWT Token valid for 3 days
     const token = jwt.sign(
       {
-        userId: user.id,
+        id: user.id,
         email: user.email,
         role: user.role,
         name: user.name,
+        phone: user.phone,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
       },
       process.env.JWT_SECRET as string,
       {
@@ -54,6 +57,8 @@ export async function POST(req: Request) {
       name: user.name,
       phone: user.phone,
       role: user.role,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
     };
 
     // Create response with token in body (not in cookie)

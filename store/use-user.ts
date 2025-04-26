@@ -1,3 +1,4 @@
+import { logoutUser } from "@/lib/actions/user-action";
 import { User } from "@/types/intrerface";
 import { create } from "zustand";
 import { persist, PersistOptions } from "zustand/middleware";
@@ -27,7 +28,10 @@ export const useUserStore = create<UserState>()(
       token: null,
       setUser: (user) => set({ user }),
       setToken: (token) => set({ token }),
-      logout: async () => set({ user: null, token: null }),
+      logout: async () => {
+        await logoutUser();
+        set({ user: null, token: null });
+      },
     }),
     persistConfig
   )

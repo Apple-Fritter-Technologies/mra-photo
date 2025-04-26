@@ -13,6 +13,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -29,8 +39,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { updateUser } from "@/lib/actions/user-action";
+import { Loader2, Trash2, AlertTriangle } from "lucide-react";
+import { deleteUser, updateUser } from "@/lib/actions/user-action";
 import { User } from "@/types/intrerface";
 
 interface UserModalProps {
@@ -39,13 +49,12 @@ interface UserModalProps {
   userData: User | null;
   refreshUsers: () => void;
   isEditing: boolean;
+  currentUserId?: string;
 }
 
-// Simplified validation schema for user role only
 const userRoleSchema = z.object({
   id: z.string(),
   role: z.enum(["admin", "user"]),
-  // Keep these fields to maintain the existing user data
   email: z.string().email(),
   name: z.string().optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
@@ -59,8 +68,16 @@ const UserModal = ({
   setOpen,
   userData,
   refreshUsers,
+  currentUserId,
 }: UserModalProps) => {
   const [loading, setLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRoleConfirm, setShowRoleConfirm] = useState(false);
+  const [showAdminDowngradeWarning, setShowAdminDowngradeWarning] =
+    useState(false);
+
+  // Check if this is the current user's profile
+  const isCurrentUser = userData?.id === currentUserId;
 
   // Initialize the form with role data
   const form = useForm<UserRoleFormValues>({
@@ -88,9 +105,22 @@ const UserModal = ({
   }, [userData, form]);
 
   const onSubmit = async (data: UserRoleFormValues) => {
+    // Check if admin is trying to downgrade themselves
+    if (isCurrentUser && userData?.role === "admin" && data.role === "user") {
+      setShowAdminDowngradeWarning(true);
+      return;
+    }
+
+    // Show confirmation dialog before updating role
+    setShowRoleConfirm(true);
+  };
+
+  const confirmRoleUpdate = async () => {
     setLoading(true);
+    setShowRoleConfirm(false);
+
     try {
-      // Only send necessary data for the update
+      const data = form.getValues();
       const response = await updateUser(data.id, data);
 
       if (response.error) {
@@ -107,72 +137,208 @@ const UserModal = ({
     }
   };
 
+  const handleDeleteClick = () => {
+    // Check if trying to delete themselves
+    if (isCurrentUser) {
+      toast.error("You cannot delete your own account");
+      return;
+    }
+
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    setLoading(true);
+    setShowDeleteConfirm(false);
+
+    try {
+      const response = await deleteUser(userData?.id!);
+      if (response.error) {
+        toast.error(response.error);
+      } else {
+        toast.success("User deleted successfully");
+        setOpen(false);
+        refreshUsers();
+      }
+    } catch (error: unknown) {
+      toast.error("Failed to delete user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const proceedWithAdminDowngrade = () => {
+    setShowAdminDowngradeWarning(false);
+    setShowRoleConfirm(true);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>Update User Role</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Update User Role</DialogTitle>
+          </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-2"
-          >
-            <div className="space-y-2">
-              <p className="text-sm font-medium">User: {userData?.email}</p>
-              <p className="text-sm text-muted-foreground">
-                {userData?.name ? `Name: ${userData.name}` : ""}
-              </p>
-            </div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 py-2"
+            >
+              <div className="space-y-2">
+                <p className="text-sm font-medium">User: {userData?.email}</p>
+                <p className="text-sm text-muted-foreground">
+                  {userData?.name ? `Name: ${userData.name}` : ""}
+                </p>
+                {isCurrentUser && (
+                  <div className="flex items-center gap-2 text-amber-500 bg-amber-50 p-2 rounded-md mt-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <p className="text-xs">This is your account</p>
+                  </div>
+                )}
+              </div>
 
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Admin users have full access to the dashboard.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-between items-center gap-2">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDeleteClick}
+                  disabled={loading || isCurrentUser}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
                   >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Admin users have full access to the dashboard.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Update Role
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-            <div className="flex justify-end pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="mr-2"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update Role
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              user account and remove their data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Role Update Confirmation Dialog */}
+      <AlertDialog open={showRoleConfirm} onOpenChange={setShowRoleConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to change this user's role to{" "}
+              {form.getValues().role}? This will change their permissions in the
+              system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRoleUpdate}>
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Admin Self-Downgrade Warning Dialog */}
+      <AlertDialog
+        open={showAdminDowngradeWarning}
+        onOpenChange={setShowAdminDowngradeWarning}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-amber-600">
+              Warning: Downgrading Your Admin Access
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="flex flex-col gap-2">
+                <span>
+                  You are about to change your own role from Admin to User.
+                </span>
+                <span className="font-medium">
+                  This will remove your administrative privileges, and you may
+                  lose access to this admin dashboard.
+                </span>
+                <span>Are you sure you want to continue?</span>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-amber-600 hover:bg-amber-700 hover:text-white text-white"
+              onClick={proceedWithAdminDowngrade}
+            >
+              I Understand, Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

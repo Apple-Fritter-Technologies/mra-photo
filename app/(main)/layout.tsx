@@ -40,7 +40,6 @@ export const metadata: Metadata = {
         alt: "Maria Rose Photography Portfolio Sample",
       },
     ],
-    locale: "en_US",
     type: "website",
   },
   twitter: {
@@ -51,15 +50,13 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/mra-wide-logo.png",
+        width: 1200,
+        height: 630,
         alt: "Maria Rose Photography Portfolio",
       },
     ],
   },
-  icons: {
-    icon: [{ url: "/favicon.png" }],
-    apple: [{ url: "/favicon.png" }],
-  },
-  manifest: "/site.webmanifest",
+  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({
@@ -70,6 +67,7 @@ export default function RootLayout({
   return (
     <div className="mt-32 md:mt-36 overflow-hidden">
       <Navbar />
+
       {children}
       <Footer />
     </div>

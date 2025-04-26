@@ -7,9 +7,10 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 import { User } from "@/types/intrerface";
-import { getAllUsers, updateUser } from "@/lib/actions/user-action";
+import { getAllUsers } from "@/lib/actions/user-action";
 import UserModal from "../../components/user-modal";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,7 +18,6 @@ const UsersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [updatingRoleId, setUpdatingRoleId] = useState<string | null>(null);
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -47,33 +47,6 @@ const UsersPage = () => {
   const handleEditUserRole = (user: User) => {
     setCurrentUser(user);
     setOpen(true);
-  };
-
-  const toggleUserRole = async (user: User) => {
-    setUpdatingRoleId(user.id!);
-    try {
-      const newRole = user.role === "admin" ? "user" : "admin";
-      const updateData = {
-        id: user.id,
-        email: user.email,
-        name: user.name || "",
-        phone: user.phone || "",
-        role: newRole,
-      };
-
-      const response = await updateUser(user.id!, updateData);
-
-      if (response.error) {
-        toast.error(response.error);
-      } else {
-        toast.success(`User role updated to ${newRole}`);
-        fetchUsers();
-      }
-    } catch (error: any) {
-      toast.error("An error occurred while updating role");
-    } finally {
-      setUpdatingRoleId(null);
-    }
   };
 
   return (
@@ -135,13 +108,12 @@ const UsersPage = () => {
                   <td className="p-4">{user.phone || "—"}</td>
                   <td className="p-4">
                     <Badge
-                      variant={user.role === "admin" ? "default" : "secondary"}
-                      className="cursor-pointer"
-                      onClick={() => toggleUserRole(user)}
+                      className={cn(
+                        user.role === "admin"
+                          ? "bg-secondary text-white"
+                          : "bg-primary text-black"
+                      )}
                     >
-                      {updatingRoleId === user.id ? (
-                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                      ) : null}
                       {user.role}
                     </Badge>
                   </td>
@@ -177,6 +149,7 @@ const UsersPage = () => {
         userData={currentUser}
         refreshUsers={fetchUsers}
         isEditing={true}
+        currentUserId={currentUser?.id}
       />
     </div>
   );

@@ -24,7 +24,11 @@ import {
   EyeOff,
   UserPlus,
 } from "lucide-react";
-import { loginUser, verifyUserToken } from "@/lib/actions/user-action";
+import {
+  getAuthToken,
+  loginUser,
+  verifyUserToken,
+} from "@/lib/actions/user-action";
 import { toast } from "sonner";
 import ForgotPasswordModal from "@/components/forgot-password-modal";
 import { useUserStore } from "@/store/use-user";
@@ -42,6 +46,42 @@ const UserLoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
+  const checkAuthStatus = async () => {
+    setIsCheckingAuth(true);
+
+    try {
+      const cookieToken = await getAuthToken();
+
+      if (cookieToken && !token) {
+        setToken(cookieToken);
+      }
+
+      const tokenToVerify = token || cookieToken;
+
+      if (tokenToVerify) {
+        const res = await verifyUserToken(tokenToVerify);
+
+        if (res.authorized) {
+          if (!token) {
+            setToken(tokenToVerify);
+          }
+          router.push("/");
+        } else {
+          await logout();
+        }
+      }
+    } catch (error) {
+      toast.error("Authentication error. Please log in again.");
+      await logout();
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -55,8 +95,6 @@ const UserLoginPage = () => {
 
     try {
       const res = await loginUser({ email, password });
-
-      console.log("Login response:", res);
 
       if (res.error) {
         setError(true);
@@ -83,40 +121,6 @@ const UserLoginPage = () => {
       setIsLoading(false);
     }
   };
-
-  const checkAuthStatus = async () => {
-    if (token) {
-      try {
-        const res = await verifyUserToken(token);
-
-        if (res.authorized) {
-          // Redirect based on user role
-          if (res.user?.role === "admin") {
-            router.push("/admin/dashboard");
-          } else {
-            router.push("/account");
-          }
-          return;
-        } else {
-          await logout();
-
-          if (res.error) {
-            toast.error("Session expired", {
-              description: res.error,
-            });
-          }
-        }
-      } catch (error) {
-        toast.error("Token verification failed. Please log in again.");
-        await logout();
-      }
-    }
-    setIsCheckingAuth(false);
-  };
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
 
   if (isCheckingAuth) {
     return (
