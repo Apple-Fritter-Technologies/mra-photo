@@ -58,3 +58,17 @@ export interface Booking {
   message?: string;
   created_at?: string;
 }
+
+export interface PaymentData {
+  sourceId: string;
+  amount: number;
+  customerId?: string;
+  locationId?: string;
+  orderId?: string;
+  referenceId?: string;
+  note?: string;
+  appFee?: number;
+  buyerEmailAddress: string;
+  givenName?: string;
+  phoneNumber?: string;
+}

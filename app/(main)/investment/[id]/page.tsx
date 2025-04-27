@@ -106,29 +106,30 @@ const ProductDetailPage = () => {
     setPaymentLoading(true);
 
     try {
-      // Validate date and time selection
-      if (!selectedDate) {
-        toast.error("Please select a date for your session");
-        setPaymentLoading(false);
-        return;
-      }
+      // Square payment flow requires a source ID from the payment form
+      // For now, open a form or redirect to a payment page
 
-      if (!selectedTime) {
-        toast.error("Please select a time for your session");
-        setPaymentLoading(false);
-        return;
-      }
+      // First, save session details locally or in state management
+      const sessionDetails = {
+        packageId: product?.id,
+        packageName: product?.title,
+        price: product?.price,
+        date: selectedDate,
+        time: selectedTime,
+      };
 
-      // Mock integration with Square payment
-      toast.success("Redirecting to payment gateway...");
+      // Store session details in localStorage for recovery
+      localStorage.setItem("pendingBooking", JSON.stringify(sessionDetails));
 
-      // Pass date and time as query parameters
-      setTimeout(() => {
-        router.push(
-          `/inquire?package=${id}&date=${selectedDate.toISOString()}&time=${selectedTime}`
-        );
-      }, 1500);
+      // Redirect to payment page with necessary details
+      router.push(
+        `/checkout?package=${id}&date=${selectedDate.toISOString()}&time=${selectedTime}`
+      );
+
+      // Note: The actual payment processing with createPayment() will happen on the checkout page
+      // after collecting card details and generating a source ID with Square's Web Payment SDK
     } catch (error) {
+      console.error("Payment error:", error);
       toast.error("Failed to initiate payment");
     } finally {
       setPaymentLoading(false);
@@ -140,20 +141,15 @@ const ProductDetailPage = () => {
   };
 
   const handleRedirectToInquire = () => {
-    // Start with the base URL including the package
     let inquireUrl = `/inquire?package=${id}`;
 
-    // Add date parameter if a date has been selected
     if (selectedDate) {
       inquireUrl += `&date=${selectedDate.toISOString()}`;
     }
-
-    // Add time parameter if a time has been selected
     if (selectedTime) {
       inquireUrl += `&time=${selectedTime}`;
     }
 
-    // Navigate to the inquiry page with all available parameters
     router.push(inquireUrl);
   };
 
