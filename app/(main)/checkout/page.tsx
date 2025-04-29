@@ -35,6 +35,11 @@ import {
 } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { useUserStore } from "@/store/use-user";
+import { getAuthToken, verifyUserToken } from "@/lib/actions/user-action";
+import { useLocalStorage } from "usehooks-ts";
+import { getProductById } from "@/lib/actions/product-action";
+import { createPayment } from "@/lib/actions/payment-action";
+import { PaymentData } from "@/types/intrerface";
 
 // Types
 interface CheckoutSession {
@@ -58,7 +63,7 @@ interface Product {
 const CheckoutPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useUserStore();
+  const { token, setToken, logout, user } = useUserStore();
 
   const packageId = searchParams.get("package");
   const dateParam = searchParams.get("date");
@@ -77,6 +82,7 @@ const CheckoutPage = () => {
   const [paymentStatus, setPaymentStatus] = useState<
     "pending" | "processing" | "success" | "error"
   >("pending");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // set customer info from user store
   useEffect(() => {
@@ -90,97 +96,117 @@ const CheckoutPage = () => {
     }
   }, [user]);
 
-  // Check user authentication
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (!user) {
-        toast.error("Please log in to continue with checkout", {
-          description: "You must be logged in to complete a booking",
-        });
-        router.push("/login?redirect=/checkout");
-        return;
+  const checkAuthStatus = async () => {
+    setIsCheckingAuth(true);
+
+    try {
+      const cookieToken = await getAuthToken();
+
+      if (cookieToken && !token) {
+        setToken(cookieToken);
       }
-    };
 
-    checkAuth();
-  }, [user, router]);
+      const tokenToVerify = token || cookieToken;
 
-  // Get session data from URL parameters or localStorage
-  useEffect(() => {
-    const loadSessionData = async () => {
-      try {
-        setLoading(true);
+      if (tokenToVerify) {
+        const res = await verifyUserToken(tokenToVerify);
 
-        if (!packageId || !dateParam || !timeParam) {
-          // Try to recover from localStorage if URL params are missing
-          const savedSession = localStorage.getItem("pendingBooking");
-
-          if (savedSession) {
-            const parsedSession = JSON.parse(savedSession);
-            setSession({
-              ...parsedSession,
-              date: new Date(parsedSession.date),
-            });
-
-            // Load product details
-            await fetchProductDetails(parsedSession.packageId);
-          } else {
-            toast.error("Missing session details", {
-              description: "Please select a package and date to proceed",
-            });
-            router.push("/investment");
-            return;
+        if (res.authorized) {
+          if (!token) {
+            setToken(tokenToVerify);
           }
         } else {
-          // Create session from URL parameters
-          const sessionData = {
-            packageId: packageId,
-            date: new Date(dateParam),
-            time: timeParam,
-          };
+          // Token is invalid
+          toast.error("Session expired. Please log in again.");
+          await logout();
+          router.push("/login");
+        }
+      } else {
+        // No token found anywhere
+        toast.error("Authentication required. Please log in.");
+        router.push("/login");
+      }
+    } catch (error) {
+      console.error("Auth verification error:", error);
+      toast.error("Authentication error. Please log in again.");
+      await logout();
+      router.push("/login");
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  // Get session data from URL parameters or localStorage
+  const loadSessionData = async () => {
+    try {
+      setLoading(true);
+
+      if (!packageId || !dateParam || !timeParam) {
+        // Try to recover from localStorage if URL params are missing
+        const savedSession = localStorage.getItem("pendingBooking");
+
+        if (savedSession) {
+          const parsedSession = JSON.parse(savedSession);
+          setSession({
+            ...parsedSession,
+            date: new Date(parsedSession.date),
+          });
 
           // Load product details
-          await fetchProductDetails(packageId);
+          await fetchProductDetails(parsedSession.packageId);
+        } else {
+          toast.error("Missing session details", {
+            description: "Please select a package and date to proceed",
+          });
+          router.push("/investment");
+          return;
         }
-      } catch (error) {
-        console.error("Error loading session data:", error);
-        toast.error("Failed to load booking details");
-      } finally {
-        setLoading(false);
+      } else {
+        // Load product details
+        await fetchProductDetails(packageId);
+        setProduct(await getProductById(packageId));
       }
-    };
+    } catch (error) {
+      console.error("Error loading session data:", error);
+      toast.error("Failed to load booking details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadSessionData();
-  }, [packageId, dateParam, timeParam, router]);
+  useEffect(() => {
+    if (!isCheckingAuth) {
+      loadSessionData();
+    }
+  }, [packageId, dateParam, timeParam, router, isCheckingAuth]);
 
   const fetchProductDetails = async (id: string) => {
     try {
       // This would be replaced with your actual API call
-      const response = await getProducts();
+      const res = await getProductById(id);
 
-      const foundProduct = response.find((p: Product) => p.id === id);
-
-      if (!foundProduct) {
-        toast.error("Product not found");
-        router.push("/investment");
+      if (res.error) {
+        toast.error("Failed to load product details");
         return;
       }
-
-      setProduct(foundProduct);
 
       // Update session with product details
       setSession((prev) =>
         prev
           ? {
               ...prev,
-              packageId: foundProduct.id,
-              packageName: foundProduct.title,
-              price: foundProduct.price,
+              packageId: res.id,
+              packageName: res.title,
+              price: res.price,
             }
           : {
-              packageId: foundProduct.id,
-              packageName: foundProduct.title,
-              price: foundProduct.price,
+              packageId: res.id,
+              packageName: res.title,
+              price: res.price,
               date: dateParam ? new Date(dateParam) : new Date(),
               time: timeParam || "morning",
             }
@@ -191,18 +217,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Mock function to get products (replace with actual API call)
-  const getProducts = async () => {
-    // This would be your actual API endpoint
-    try {
-      const response = await axios.get("/api/products");
-      return response.data;
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-      return [];
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({
@@ -210,6 +224,8 @@ const CheckoutPage = () => {
       [name]: value,
     }));
   };
+
+  // Update the handlePaymentSuccess function
 
   const handlePaymentSuccess = async (token: any) => {
     if (!session || !product) {
@@ -223,38 +239,71 @@ const CheckoutPage = () => {
       return;
     }
 
+    if (!customerInfo.email) {
+      toast.error("Please provide your email address");
+      return;
+    }
+
     setProcessing(true);
     setPaymentStatus("processing");
 
     try {
-      // Create payment through your API
-      const paymentResponse = await axios.post("/api/payments", {
-        sourceId: token.token,
-        amount: product.price,
-        currency: "USD",
-        productId: product.id,
-        productName: product.title,
+      // Create the order first to get order ID
+      const orderData = {
+        user_id: user.id,
+        user_email: customerInfo.email,
+        user_name: customerInfo.name,
+        user_phone: customerInfo.phone,
+        product_id: product.id,
+        product_title: product.title,
+        product_price: product.price,
         date: session.date,
         time: session.time,
-        customerInfo,
-        userId: user.id, // Include the user ID
-      });
+        order_status: "pending",
+        currency: "USD",
+        note: customerInfo.note || "",
+        paid_amount: product.price,
+        payment_method: "credit_card",
+      };
 
-      if (paymentResponse.data.success) {
+      // This represents a lightweight order for the payment API
+      const orderReference = {
+        id: "", // Will be populated by the backend
+        name: customerInfo.name,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+        note: customerInfo.note || "",
+        date: session.date,
+        time: session.time,
+        product_id: product.id,
+        session_name: product.title,
+        user_id: user.id,
+        status: "pending",
+      };
+
+      const paymentData: PaymentData = {
+        sourceId: token.token,
+        amount: product.price * 100, // Amount in cents
+        product: {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+        },
+        order: orderReference,
+        customerId: "", // Will be determined by the backend
+        buyerEmailAddress: customerInfo.email,
+        givenName: customerInfo.name,
+        phoneNumber: customerInfo.phone,
+        currency: "USD",
+        user_id: user.id,
+        paymentMethod: "credit_card",
+      };
+
+      // Create payment through your API
+      const paymentResponse = await createPayment(paymentData);
+
+      if (paymentResponse.success) {
         setPaymentStatus("success");
-
-        // Create booking record with updated fields
-        await axios.post("/api/bookings", {
-          name: customerInfo.name,
-          email: customerInfo.email,
-          phone: customerInfo.phone,
-          note: customerInfo.note,
-          date: session.date,
-          time: session.time,
-          product_id: product.id,
-          session_name: product.title,
-          user_id: user.id, // Include the user ID
-        });
 
         // Clear the pending booking from localStorage
         localStorage.removeItem("pendingBooking");
@@ -268,11 +317,11 @@ const CheckoutPage = () => {
         // Redirect to confirmation page after a short delay
         setTimeout(() => {
           router.push(
-            `/booking-confirmation?id=${paymentResponse.data.orderId}`
+            `/booking-confirmation?id=${paymentResponse.order?.id || ""}`
           );
         }, 2000);
       } else {
-        throw new Error("Payment failed");
+        throw new Error(paymentResponse.error || "Payment failed");
       }
     } catch (error) {
       console.error("Payment processing error:", error);

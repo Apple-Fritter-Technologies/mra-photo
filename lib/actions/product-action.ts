@@ -19,6 +19,20 @@ export const getProducts = async () => {
   }
 };
 
+export const getProductById = async (id: string) => {
+  try {
+    const res = await axios.get(`${ApiUrl}/api/products?id=${id}`);
+    return res.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return {
+        error: error.response?.data?.error || "Failed to fetch product",
+      };
+    }
+    return { error: "Failed to fetch product" };
+  }
+};
+
 export const addProduct = async (product: Product) => {
   const sessionToken = await getSessionToken();
   if (!sessionToken) {

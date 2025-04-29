@@ -76,18 +76,43 @@ model User {
 model Order {
   id             String   @id @default(uuid())
   user_id        String
+  user_email     String
+  user_name      String?
+  user_phone     String?
   product_id     String
-  product_name   String
-  status         String   @default("pending")
+  product_title  String
+  product_price  Float
   date           DateTime
   time           String
-  amount         Float
-  currency       String
-  payment_id     String
-  payment_status String
+  order_status   String   @default("pending")
+  currency       String   @default("USD")
+  note           String?
+  paid_amount    Float
+  payment_id     String?
+  payment_method String   @default("credit_card")
+  payment_status String?  @default("pending")
   created_at     DateTime @default(now())
   updated_at     DateTime @default(now()) @updatedAt
 
-  User    User    @relation(fields: [user_id], references: [id])
-  Product Product @relation(fields: [product_id], references: [id])
+  User    User      @relation(fields: [user_id], references: [id])
+  Product Product   @relation(fields: [product_id], references: [id])
+  Payment Payment[]
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  order_id       String
+  product_id     String
+  user_id        String
+  user_email     String
+  customer_id    String
+  source_id      String
+  amount         Float
+  currency       String   @default("USD")
+  payment_method String   @default("credit_card")
+  status         String   @default("pending")
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now()) @updatedAt
+
+  Order Order @relation(fields: [order_id], references: [id])
 }

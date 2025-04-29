@@ -10,7 +10,6 @@ export interface ImageHeaderProps {
   title: string;
 }
 
-// Add or update the User interface
 export interface User {
   id?: string;
   email: string;
@@ -59,16 +58,56 @@ export interface Booking {
   created_at?: string;
 }
 
+export interface OrderProduct {
+  id: string;
+  title: string;
+  price: number;
+}
 export interface PaymentData {
   sourceId: string;
   amount: number;
-  customerId?: string;
+  product: OrderProduct;
+  order: Order;
+  customerId: string;
   locationId?: string;
   orderId?: string;
   referenceId?: string;
   note?: string;
   appFee?: number;
+  paymentMethod?: string;
   buyerEmailAddress: string;
   givenName?: string;
   phoneNumber?: string;
+  currency?: string;
+  user_id: string;
+  status?: string;
+}
+
+export interface Customer {
+  id?: string;
+  emailAddress: string;
+  givenName?: string;
+  phoneNumber?: string;
+}
+
+export interface Order {
+  id: string;
+  user_id: string;
+  user_email: string;
+  user_name?: string;
+  user_phone?: string;
+  product_id: string;
+  product_title: string;
+  product_price: number;
+  date: Date;
+  time: string;
+  order_status: string;
+  currency: string;
+  note?: string;
+  paid_amount: number;
+  payment_id?: string;
+  payment_method: string;
+  payment_status?: string;
+  created_at?: Date;
+  updated_at?: Date;
 }

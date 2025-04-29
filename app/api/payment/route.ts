@@ -1,6 +1,8 @@
 import { SquareClient } from "square";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { Customer, Order, PaymentData } from "@/types/intrerface";
+import prisma from "@/lib/prisma";
 
 // Handle BigInt serialization for JSON
 (BigInt.prototype as any).toJSON = function () {
@@ -90,7 +92,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // At this point, TypeScript knows paymentResult is a Payment object
+    const postPaymentData = {
+      sourceId: body.sourceId,
+      amount: body.amount,
+      product: body.product,
+      order: body.order,
+      customerId: customerId,
+      locationId: body.locationId,
+      orderId: body.orderId,
+      referenceId: body.referenceId,
+      note: body.note,
+      appFee: body.appFee,
+      paymentMethod: body.paymentMethod,
+      buyerEmailAddress: body.buyerEmailAddress,
+      givenName: body.givenName,
+      phoneNumber: body.phoneNumber,
+      currency: body.currency,
+      user_id: body.user_id,
+      status: paymentResult.status,
+    };
+
+    await postPaymentToDb(postPaymentData);
+
+    if (paymentResult.status === "COMPLETED") {
+      const orderData = {
+        user_id: body.user_id,
+        user_email: body.buyerEmailAddress,
+        user_name: body.givenName,
+        user_phone: body.phoneNumber,
+        product_id: body.product.id,
+        product_title: body.product.title,
+        product_price: body.product.price,
+        date: body.date,
+        time: body.time,
+        order_status: "COMPLETED",
+        currency: body.currency,
+      };
+
+      const createdOrder = await createOrder(orderData);
+
+      return NextResponse.json({
+        success: true,
+        payment: paymentResult,
+        order: createdOrder,
+      });
+    }
+
     return NextResponse.json({ success: true, payment: paymentResult });
   } catch (error) {
     console.error("Payment error:", error);
@@ -101,37 +148,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-interface Customer {
-  id?: string;
-  emailAddress: string;
-  givenName?: string;
-  phoneNumber?: string;
-}
-
-export const findCustomer = async (emailAddress: string) => {
-  try {
-    const response = await client.customers.search({
-      query: {
-        filter: {
-          emailAddress: {
-            exact: emailAddress,
-          },
-        },
-      },
-    });
-
-    if (response.customers && response.customers.length > 0) {
-      return response.customers[0];
-    }
-
-    return null;
-  } catch (error) {
-    console.error("Error finding customer:", error);
-    return { error: "Failed to find customer" };
-  }
-};
-
-export const createCustomer = async (customerData: Customer) => {
+const createCustomer = async (customerData: Customer) => {
   try {
     const res = await client.customers.create({
       idempotencyKey: randomUUID(),
@@ -152,19 +169,7 @@ export const createCustomer = async (customerData: Customer) => {
   }
 };
 
-interface PaymentData {
-  sourceId: string;
-  amount: number;
-  customerId?: string;
-  locationId?: string;
-  orderId?: string;
-  referenceId?: string;
-  note?: string;
-  appFee?: number;
-  buyerEmailAddress?: string;
-}
-
-export const createPayment = async (paymentData: PaymentData) => {
+const createPayment = async (paymentData: PaymentData) => {
   try {
     const res = await client.payments.create({
       sourceId: paymentData.sourceId,
@@ -197,5 +202,57 @@ export const createPayment = async (paymentData: PaymentData) => {
   } catch (error) {
     console.error("Error creating payment:", error);
     return { error: "Failed to create payment" };
+  }
+};
+
+// create the order in the database using prisma
+const createOrder = async (orderData: Order) => {
+  try {
+    const order = await prisma.order.create({
+      data: {
+        user_id: orderData.user_id,
+        user_email: orderData.user_email,
+        user_name: orderData.user_name,
+        user_phone: orderData.user_phone,
+        product_id: orderData.product_id,
+        product_title: orderData.product_title,
+        product_price: orderData.product_price,
+        date: new Date(orderData.date),
+        time: orderData.time,
+        order_status: orderData.order_status,
+        currency: orderData.currency,
+        note: orderData.note,
+        paid_amount: orderData.paid_amount,
+      },
+    });
+
+    return order;
+  } catch (error) {
+    console.error("Error creating order:", error);
+    return { error: "Failed to create order" };
+  }
+};
+
+const postPaymentToDb = async (paymentData: PaymentData) => {
+  try {
+    const payment = await prisma.payment.create({
+      data: {
+        source_id: paymentData.sourceId,
+        amount: paymentData.amount,
+        product_id: paymentData.product.id,
+        order_id: paymentData.order.id,
+        payment_method: paymentData.paymentMethod,
+        user_email: paymentData.buyerEmailAddress,
+        user_id: paymentData.user_id,
+        customer_id: paymentData.customerId,
+        currency: paymentData.currency,
+        status: paymentData.status,
+      },
+    });
+
+    return payment;
+  } catch (error) {
+    console.error("Error posting payment to DB:", error);
+    return { error: "Failed to post payment to DB" };
   }
 };

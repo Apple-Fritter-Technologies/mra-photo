@@ -34,6 +34,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           if (!token) {
             setToken(tokenToVerify);
           }
+
+          if (res.user.role !== "admin") {
+            toast.error("You are not authorized to access this page.");
+            router.push("/login");
+          }
         } else {
           // Token is invalid
           toast.error("Session expired. Please log in again.");

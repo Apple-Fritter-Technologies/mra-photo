@@ -2,15 +2,8 @@
 
 import axios from "axios";
 import { ApiUrl } from "../utils";
-import { cookies } from "next/headers";
 import { PaymentData } from "@/types/intrerface";
-
-// Get the auth token from cookies
-export const getAuthToken = async () => {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("auth_token");
-  return token?.value;
-};
+import { getAuthToken } from "./user-action";
 
 // Add auth header to requests
 const createAuthenticatedRequest = async () => {
