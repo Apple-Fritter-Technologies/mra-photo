@@ -1,21 +1,31 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import {
-  Loader2,
   ArrowLeft,
-  Clock,
-  Image as ImageIcon,
   CalendarClock,
   Check,
+  Clock,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import axios from "axios";
 
-import { CreditCard, PaymentForm } from "react-square-web-payments-sdk";
+import {
+  CreditCard,
+  Divider,
+  GooglePay,
+  PaymentForm,
+} from "react-square-web-payments-sdk";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,18 +37,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
-import { useUserStore } from "@/store/use-user";
-import { getAuthToken, verifyUserToken } from "@/lib/actions/user-action";
-import { useLocalStorage } from "usehooks-ts";
-import { getProductById } from "@/lib/actions/product-action";
 import { createPayment } from "@/lib/actions/payment-action";
+import { getProductById } from "@/lib/actions/product-action";
+import { getAuthToken, verifyUserToken } from "@/lib/actions/user-action";
+import { useUserStore } from "@/store/use-user";
 import { PaymentData } from "@/types/intrerface";
 
 // Types
@@ -169,6 +172,18 @@ const CheckoutPage = () => {
         // Load product details
         await fetchProductDetails(packageId);
         setProduct(await getProductById(packageId));
+        if (product) {
+          setSession({
+            packageId: product.id,
+            packageName: product.title,
+            price: product.price,
+            date: new Date(dateParam),
+            time: timeParam,
+          });
+        } else {
+          toast.error("Failed to load product details");
+          router.push("/investment");
+        }
       }
     } catch (error) {
       console.error("Error loading session data:", error);
@@ -248,39 +263,6 @@ const CheckoutPage = () => {
     setPaymentStatus("processing");
 
     try {
-      // Create the order first to get order ID
-      const orderData = {
-        user_id: user.id,
-        user_email: customerInfo.email,
-        user_name: customerInfo.name,
-        user_phone: customerInfo.phone,
-        product_id: product.id,
-        product_title: product.title,
-        product_price: product.price,
-        date: session.date,
-        time: session.time,
-        order_status: "pending",
-        currency: "USD",
-        note: customerInfo.note || "",
-        paid_amount: product.price,
-        payment_method: "credit_card",
-      };
-
-      // This represents a lightweight order for the payment API
-      const orderReference = {
-        id: "", // Will be populated by the backend
-        name: customerInfo.name,
-        email: customerInfo.email,
-        phone: customerInfo.phone,
-        note: customerInfo.note || "",
-        date: session.date,
-        time: session.time,
-        product_id: product.id,
-        session_name: product.title,
-        user_id: user.id,
-        status: "pending",
-      };
-
       const paymentData: PaymentData = {
         sourceId: token.token,
         amount: product.price * 100, // Amount in cents
@@ -289,14 +271,19 @@ const CheckoutPage = () => {
           title: product.title,
           price: product.price,
         },
-        order: orderReference,
-        customerId: "", // Will be determined by the backend
-        buyerEmailAddress: customerInfo.email,
-        givenName: customerInfo.name,
-        phoneNumber: customerInfo.phone,
+        order: {
+          date: session.date,
+          time: session.time,
+          order_status: "pending",
+          note: customerInfo.note,
+        },
+        user: {
+          id: user.id,
+          email: customerInfo.email,
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+        },
         currency: "USD",
-        user_id: user.id,
-        paymentMethod: "credit_card",
       };
 
       // Create payment through your API
@@ -324,7 +311,8 @@ const CheckoutPage = () => {
         throw new Error(paymentResponse.error || "Payment failed");
       }
     } catch (error) {
-      console.error("Payment processing error:", error);
+      console.log("Payment processing error:", error);
+
       setPaymentStatus("error");
       toast.error("Payment processing failed", {
         description: "Please try again or contact support",
@@ -394,7 +382,7 @@ const CheckoutPage = () => {
                     value={customerInfo.name}
                     onChange={handleInputChange}
                     required
-                    disabled={!!user} // Disable if user is logged in
+                    disabled={!!user?.name}
                     className={user ? "bg-gray-50" : ""}
                   />
                   {user && (
@@ -413,7 +401,7 @@ const CheckoutPage = () => {
                     value={customerInfo.email}
                     onChange={handleInputChange}
                     required
-                    disabled={!!user} // Disable if user is logged in
+                    disabled={!!user?.email}
                     className={user ? "bg-gray-50" : ""}
                   />
                   {user && (
@@ -431,6 +419,7 @@ const CheckoutPage = () => {
                     value={customerInfo.phone}
                     onChange={handleInputChange}
                     required
+                    disabled={!!user?.phone}
                   />
                 </div>
                 <div className="space-y-2">
@@ -468,8 +457,10 @@ const CheckoutPage = () => {
                 </div>
               ) : (
                 <PaymentForm
-                  applicationId={process.env.SQUARE_APPLICATION_ID || ""}
-                  locationId={process.env.SQUARE_LOCATION_ID || ""}
+                  applicationId={
+                    process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID || ""
+                  }
+                  locationId={process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID || ""}
                   cardTokenizeResponseReceived={handlePaymentSuccess}
                   createPaymentRequest={() => ({
                     countryCode: "US",
@@ -481,12 +472,13 @@ const CheckoutPage = () => {
                   })}
                 >
                   <CreditCard />
+                  <Divider />
+                  <GooglePay />
                 </PaymentForm>
               )}
             </CardContent>
           </Card>
         </div>
-
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <Card className="sticky top-6">

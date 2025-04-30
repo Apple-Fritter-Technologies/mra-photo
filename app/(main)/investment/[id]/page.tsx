@@ -106,10 +106,6 @@ const ProductDetailPage = () => {
     setPaymentLoading(true);
 
     try {
-      // Square payment flow requires a source ID from the payment form
-      // For now, open a form or redirect to a payment page
-
-      // First, save session details locally or in state management
       const sessionDetails = {
         packageId: product?.id,
         packageName: product?.title,
@@ -125,9 +121,6 @@ const ProductDetailPage = () => {
       router.push(
         `/checkout?package=${id}&date=${selectedDate.toISOString()}&time=${selectedTime}`
       );
-
-      // Note: The actual payment processing with createPayment() will happen on the checkout page
-      // after collecting card details and generating a source ID with Square's Web Payment SDK
     } catch (error) {
       console.error("Payment error:", error);
       toast.error("Failed to initiate payment");
