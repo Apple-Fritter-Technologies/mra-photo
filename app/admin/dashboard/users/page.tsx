@@ -149,7 +149,6 @@ const UsersPage = () => {
         userData={currentUser}
         refreshUsers={fetchUsers}
         isEditing={true}
-        currentUserId={currentUser?.id}
       />
     </div>
   );

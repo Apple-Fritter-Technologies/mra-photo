@@ -1,4 +1,5 @@
 import { SquareClient } from "square";
+import { Client } from "square/legacy";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { Customer, PaymentData } from "@/types/intrerface";
@@ -6,13 +7,22 @@ import prisma from "@/lib/prisma";
 import { Order, Payment } from "@/lib/generated/prisma";
 
 // Handle BigInt serialization for JSON
-(BigInt.prototype as { toJSON?: () => string }).toJSON = function () {
+// (BigInt.prototype as { toJSON?: () => string }).toJSON = function () {
+//   return this.toString();
+// };
+
+(BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
 
 const client = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN,
-  environment: "sandbox", // Change to "production" for live transactions
+});
+
+const legacyClient = new Client({
+  bearerAuthCredentials: {
+    accessToken: process.env.SQUARE_ACCESS_TOKEN!,
+  },
 });
 
 export async function POST(req: NextRequest) {
@@ -59,7 +69,6 @@ export async function POST(req: NextRequest) {
 
     if (existingCustomer.length > 0) {
       customerId = existingCustomer?.[0].id;
-      console.log("Customer found:", customerId);
     } else {
       // Customer not found, create a new one
       const newCustomer = await createCustomer({
@@ -88,11 +97,15 @@ export async function POST(req: NextRequest) {
       }
 
       customerId = newCustomer.id;
-      console.log("New customer created:", customerId);
     }
 
     // Step 2: Create the payment with the customer ID
-    const paymentResult = await createPayment({
+    // const paymentResult = await createPayment({
+    //   ...body,
+    //   customerId: customerId,
+    // });
+
+    const paymentResult = await legacyCreatePayment({
       ...body,
       customerId: customerId,
     });
@@ -259,14 +272,17 @@ const createCustomer = async (customerData: Customer) => {
 };
 
 const createPayment = async (paymentData: PaymentData) => {
+  const paymentAmount = BigInt(paymentData.amount);
+
   try {
     const res = await client.payments.create({
       sourceId: paymentData.sourceId,
       idempotencyKey: randomUUID(),
       amountMoney: {
-        amount: BigInt(paymentData.amount),
+        amount: paymentAmount, // todo: fixing this
         currency: "USD",
       },
+      autocomplete: true,
       customerId: paymentData.customerId,
       locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
       note: paymentData.order.note,
@@ -282,7 +298,37 @@ const createPayment = async (paymentData: PaymentData) => {
 
     return res.payment;
   } catch (error) {
-    console.error("Error creating payment:", error);
+    console.error("Failed to create payment:", error);
+    return { error: "Failed to create payment" };
+  }
+};
+
+const legacyCreatePayment = async (paymentData: PaymentData) => {
+  const paymentAmount = BigInt(paymentData.amount);
+  try {
+    const res = await legacyClient.paymentsApi.createPayment({
+      sourceId: paymentData.sourceId,
+      idempotencyKey: randomUUID(),
+      amountMoney: {
+        amount: paymentAmount,
+        currency: "USD",
+      },
+      autocomplete: true,
+      customerId: paymentData.customerId,
+      locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
+      note: paymentData.order.note,
+      buyerEmailAddress: paymentData.user.email,
+      buyerPhoneNumber: paymentData.user.phone,
+      referenceId: paymentData.user.id,
+    });
+    if (res.result.errors) {
+      console.error("Error creating payment:", res.result.errors);
+      return { error: "Failed to create payment" };
+    }
+
+    return res.result.payment;
+  } catch (error) {
+    console.error("Failed to create payment:", error);
     return { error: "Failed to create payment" };
   }
 };

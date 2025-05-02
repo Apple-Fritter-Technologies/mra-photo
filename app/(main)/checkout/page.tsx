@@ -229,7 +229,50 @@ const CheckoutPage = () => {
     }));
   };
 
-  // Update the handlePaymentSuccess function
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    // Only allow digits for processing
+    const digitsOnly = value.replace(/\D/g, "");
+
+    // Format the phone number for display
+    let formattedInput = "";
+
+    if (digitsOnly.length <= 10) {
+      // Format as (XXX) XXX-XXXX for US numbers
+      if (digitsOnly.length > 3) {
+        formattedInput += `(${digitsOnly.substring(0, 3)})`;
+        if (digitsOnly.length > 6) {
+          formattedInput += ` ${digitsOnly.substring(
+            3,
+            6
+          )}-${digitsOnly.substring(6, 10)}`;
+        } else {
+          formattedInput += ` ${digitsOnly.substring(3, digitsOnly.length)}`;
+        }
+      } else if (digitsOnly.length > 0) {
+        formattedInput += `(${digitsOnly}`;
+      }
+    } else {
+      // Handle international numbers with country code
+      const countryCode = digitsOnly.substring(0, digitsOnly.length - 10);
+      const areaCode = digitsOnly.substring(
+        digitsOnly.length - 10,
+        digitsOnly.length - 7
+      );
+      const prefix = digitsOnly.substring(
+        digitsOnly.length - 7,
+        digitsOnly.length - 4
+      );
+      const lineNumber = digitsOnly.substring(digitsOnly.length - 4);
+
+      formattedInput = `+${countryCode} (${areaCode}) ${prefix}-${lineNumber}`;
+    }
+
+    setCustomerInfo((prev) => ({
+      ...prev,
+      phone: formattedInput,
+    }));
+  };
 
   const handlePaymentSuccess = async (token: any) => {
     if (!session || !product) {
@@ -252,6 +295,23 @@ const CheckoutPage = () => {
     setPaymentStatus("processing");
 
     try {
+      // Format the phone number to E.164 format
+      let formattedPhone = customerInfo.phone;
+      if (formattedPhone) {
+        // Remove all non-digit characters
+        formattedPhone = formattedPhone.replace(/\D/g, "");
+
+        // Add +1 (US) prefix if it's a 10-digit number without country code
+        if (formattedPhone.length === 10) {
+          formattedPhone = "+1" + formattedPhone;
+        } else if (
+          formattedPhone.length > 10 &&
+          !formattedPhone.startsWith("+")
+        ) {
+          formattedPhone = "+" + formattedPhone;
+        }
+      }
+
       const paymentData: PaymentData = {
         sourceId: token.token,
         amount: product.price * 100, // Amount in cents
@@ -270,7 +330,7 @@ const CheckoutPage = () => {
           id: user.id,
           email: customerInfo.email,
           name: customerInfo.name,
-          phone: customerInfo.phone,
+          phone: formattedPhone, // Use the formatted phone
         },
         currency: "USD",
       };
@@ -406,10 +466,13 @@ const CheckoutPage = () => {
                     name="phone"
                     placeholder="(555) 123-4567"
                     value={customerInfo.phone}
-                    onChange={handleInputChange}
+                    onChange={handlePhoneChange}
                     required
                     disabled={!!user?.phone}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Please include area code (e.g., 555-123-4567)
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="note">Special Requests (Optional)</Label>

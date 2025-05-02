@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
@@ -42,6 +42,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { deleteUser, updateUser } from "@/lib/actions/user-action";
 import { User } from "@/types/intrerface";
+import { useUserStore } from "@/store/use-user";
 
 interface UserModalProps {
   open: boolean;
@@ -49,15 +50,11 @@ interface UserModalProps {
   userData: User | null;
   refreshUsers: () => void;
   isEditing: boolean;
-  currentUserId?: string;
 }
 
 const userRoleSchema = z.object({
   id: z.string(),
   role: z.enum(["admin", "user"]),
-  email: z.string().email(),
-  name: z.string().optional().or(z.literal("")),
-  phone: z.string().optional().or(z.literal("")),
 });
 
 // Define form values type from schema
@@ -68,8 +65,9 @@ const UserModal = ({
   setOpen,
   userData,
   refreshUsers,
-  currentUserId,
 }: UserModalProps) => {
+  const { user } = useUserStore();
+
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRoleConfirm, setShowRoleConfirm] = useState(false);
@@ -77,30 +75,41 @@ const UserModal = ({
     useState(false);
 
   // Check if this is the current user's profile
-  const isCurrentUser = userData?.id === currentUserId;
+  const isCurrentUser = userData?.id === user?.id;
 
-  // Initialize the form with role data
+  // Add a state to track if role has changed for more reactive button state
+  const [roleChanged, setRoleChanged] = useState(false);
+
+  // Initialize the form with role data only
   const form = useForm<UserRoleFormValues>({
     resolver: zodResolver(userRoleSchema),
     defaultValues: {
       id: userData?.id || "",
-      email: userData?.email || "",
-      name: userData?.name || "",
-      phone: userData?.phone || "",
       role: (userData?.role as "admin" | "user") || "user",
     },
   });
+
+  // Watch for role changes
+  const currentRole = useWatch({
+    control: form.control,
+    name: "role",
+  });
+
+  // Update roleChanged state when role changes
+  useEffect(() => {
+    if (userData && currentRole) {
+      setRoleChanged(userData.role !== currentRole);
+    }
+  }, [userData, currentRole]);
 
   // Update form values when userData changes
   useEffect(() => {
     if (userData) {
       form.reset({
         id: userData.id || "",
-        email: userData.email || "",
-        name: userData.name || "",
-        phone: userData.phone || "",
         role: (userData.role as "admin" | "user") || "user",
       });
+      setRoleChanged(false); // Reset the role changed state
     }
   }, [userData, form]);
 
@@ -121,7 +130,7 @@ const UserModal = ({
 
     try {
       const data = form.getValues();
-      const response = await updateUser(data.id, data);
+      const response = await updateUser(data.id, { role: data.role });
 
       if (response.error) {
         toast.error(response.error);
@@ -140,7 +149,10 @@ const UserModal = ({
   const handleDeleteClick = () => {
     // Check if trying to delete themselves
     if (isCurrentUser) {
-      toast.error("You cannot delete your own account");
+      toast.error("You cannot delete your own account", {
+        description:
+          "For security reasons, you cannot delete your own account.",
+      });
       return;
     }
 
@@ -234,6 +246,11 @@ const UserModal = ({
                   variant="destructive"
                   onClick={handleDeleteClick}
                   disabled={loading || isCurrentUser}
+                  title={
+                    isCurrentUser
+                      ? "You cannot delete your own account"
+                      : "Delete user"
+                  }
                 >
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -250,7 +267,7 @@ const UserModal = ({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={loading}>
+                  <Button type="submit" disabled={loading || !roleChanged}>
                     {loading && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
@@ -277,7 +294,7 @@ const UserModal = ({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
             >
               Delete
             </AlertDialogAction>
@@ -316,7 +333,7 @@ const UserModal = ({
               Warning: Downgrading Your Admin Access
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <div className="flex flex-col gap-2">
+              <span className="flex flex-col gap-2">
                 <span>
                   You are about to change your own role from Admin to User.
                 </span>
@@ -325,7 +342,7 @@ const UserModal = ({
                   lose access to this admin dashboard.
                 </span>
                 <span>Are you sure you want to continue?</span>
-              </div>
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
