@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const ApiUrl = process.env.APP_URL;
+export const ApiUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export function formatCurrency(amount: number, currency: string = "USD") {
   return new Intl.NumberFormat("en-US", {
