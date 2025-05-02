@@ -2,12 +2,6 @@ import prisma from "@/lib/prisma";
 import { verifyAuth } from "@/lib/server-service";
 import { NextRequest, NextResponse } from "next/server";
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
 interface UserUpdateData {
   email?: string;
   name?: string;
@@ -16,16 +10,18 @@ interface UserUpdateData {
 }
 
 // PATCH - Update a specific user
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     // Verify authentication
     const auth = await verifyAuth(req);
     if (!auth.authorized) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
-
-    // Fix: Access id directly without awaiting params
-    const id = (await params).id;
+    // Extract user ID from params
+    const { id } = await params;
 
     // Check if the user has admin role or is updating their own record
     if (auth.user?.role !== "admin" && auth.user?.id !== id) {
