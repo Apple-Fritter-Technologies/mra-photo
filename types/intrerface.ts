@@ -71,17 +71,6 @@ export interface PaymentData {
   user: Customer;
   currency: string;
   customerId?: string;
-  // locationId?: string;
-  // orderId?: string;
-  // referenceId?: string;
-  // note?: string;
-  // appFee?: number;
-  // paymentMethod?: string;
-  // buyerEmailAddress: string;
-  // givenName?: string;
-  // phoneNumber?: string;
-  // user_id: string;
-  // status?: string;
 }
 
 export interface Customer {
@@ -96,35 +85,20 @@ export interface Order {
   time: string;
   order_status: string;
   note?: string;
-  // id: string;
-  // user_id: string;
-  // user_email: string;
-  // user_name?: string;
-  // user_phone?: string;
-  // product_id: string;
-  // product_title: string;
-  // product_price: number;
-  // currency: string;
-  // paid_amount: number;
-  // payment_id?: string;
-  // payment_method: string;
-  // payment_status?: string;
-  // created_at?: Date;
-  // updated_at?: Date;
 }
 
-// export interface PaymentDB {
-//   id: string;
-//   order_id: string;
-//   product_id: string;
-//   user_id: string;
-//   user_email: string;
-//   customer_id: string;
-//   source_id: string;
-//   amount: number;
-//   currency: string;
-//   payment_method: string;
-//   status: string;
-//   created_at?: Date;
-//   updated_at?: Date;
-// }
+export interface SquarePaymentToken {
+  token: string;
+  status: string;
+  details?: {
+    card?: {
+      brand: string;
+      last4: string;
+      expMonth: number;
+      expYear: number;
+    };
+    billing?: {
+      postalCode: string;
+    };
+  };
+}

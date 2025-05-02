@@ -130,8 +130,8 @@ const UserModal = ({
         setOpen(false);
         refreshUsers();
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update user role");
+    } catch (error: unknown) {
+      toast.error("Failed to update user role");
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,8 @@ const UserModal = ({
     setShowDeleteConfirm(false);
 
     try {
-      const response = await deleteUser(userData?.id!);
+      const response = await deleteUser(userData?.id || "");
+
       if (response.error) {
         toast.error(response.error);
       } else {
@@ -290,7 +291,7 @@ const UserModal = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to change this user's role to{" "}
+              Are you sure you want to change this user&apos;s role to{" "}
               {form.getValues().role}? This will change their permissions in the
               system.
             </AlertDialogDescription>

@@ -32,8 +32,8 @@ const UsersPage = () => {
         setUsers(data);
         setError(null);
       }
-    } catch (error: any) {
-      setError(error.message || "Failed to fetch users");
+    } catch (error: unknown) {
+      setError("Failed to fetch users");
       toast.error("Failed to fetch users");
     } finally {
       setLoading(false);

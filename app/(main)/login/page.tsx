@@ -246,7 +246,7 @@ const UserLoginPage = () => {
           <CardFooter className="flex flex-col space-y-4 pt-2">
             <div className="text-center w-full">
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-                Don't have an account?
+                Don&apos;t have an account?
               </p>
               <Button
                 variant="outline"

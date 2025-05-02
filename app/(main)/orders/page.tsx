@@ -41,11 +41,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface Order {
+  id: string;
+  date: Date;
+  time: string;
+  product_name: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reference: string;
+}
+
 const OrdersPage = () => {
   const router = useRouter();
   const { token, user } = useUserStore();
 
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

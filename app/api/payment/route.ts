@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 import { Order, Payment } from "@/lib/generated/prisma";
 
 // Handle BigInt serialization for JSON
-(BigInt.prototype as any).toJSON = function () {
+(BigInt.prototype as { toJSON?: () => string }).toJSON = function () {
   return this.toString();
 };
 

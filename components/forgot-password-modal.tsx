@@ -63,7 +63,7 @@ const ForgotPasswordModal = ({
         <DialogHeader>
           <DialogTitle>Reset Password</DialogTitle>
           <DialogDescription>
-            Enter your email address. We'll send you a link to reset your
+            Enter your email address. We&apos;ll send you a link to reset your
             password.
           </DialogDescription>
         </DialogHeader>

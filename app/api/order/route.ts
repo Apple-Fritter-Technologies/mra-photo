@@ -74,75 +74,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Create a new order
-export async function POST(req: NextRequest) {
-  try {
-    // Verify authentication
-    const auth = await verifyAuth(req);
-    if (!auth.authorized) {
-      return NextResponse.json({ error: auth.error }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const {
-      product_id,
-      date,
-      time,
-      amount,
-      currency,
-      payment_id,
-      payment_status,
-    } = body;
-
-    // Validate required fields
-    if (
-      !product_id ||
-      !date ||
-      !time ||
-      !amount ||
-      !currency ||
-      !payment_id ||
-      !payment_status
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    // Get product to verify it exists and get the name
-    const product = await prisma.product.findUnique({
-      where: { id: product_id },
-    });
-
-    if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    // Create order
-    const order = await prisma.order.create({
-      data: {
-        user_id: auth.user?.id!, // TODO: need to take care Assuming user is authenticated
-        product_id,
-        product_name: product.title,
-        date: new Date(date),
-        time,
-        amount,
-        currency,
-        payment_id,
-        payment_status,
-      },
-    });
-
-    return NextResponse.json(order, { status: 201 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to create order" },
-      { status: 500 }
-    );
-  }
-}
-
 // PUT - Update an order (admin only or owner)
 export async function PUT(req: NextRequest) {
   try {
@@ -188,15 +119,20 @@ export async function PUT(req: NextRequest) {
     const updatedOrder = await prisma.order.update({
       where: { id },
       data: {
-        status: body.status,
+        order_status: body.order_status,
         date: body.date ? new Date(body.date) : undefined,
         time: body.time,
         payment_status: body.payment_status,
+        note: body.note,
+        user_name: body.user_name,
+        user_phone: body.user_phone,
+        payment_method: body.payment_method,
       },
     });
 
     return NextResponse.json(updatedOrder, { status: 200 });
   } catch (error) {
+    console.error("Error updating order:", error);
     return NextResponse.json(
       { error: "Failed to update order" },
       { status: 500 }

@@ -329,7 +329,7 @@ const CheckoutPage = () => {
         <div className="max-w-md mx-auto text-center space-y-4">
           <h1 className="text-2xl font-bold">Session Details Not Found</h1>
           <p className="text-gray-600">
-            We couldn't find the details for your photography session.
+            We couldn&apos;t find the details for your photography session.
           </p>
           <Button onClick={() => router.push("/investment")}>
             Browse Photography Packages
@@ -505,7 +505,7 @@ const CheckoutPage = () => {
 
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="whats-included">
-                  <AccordionTrigger>What's Included</AccordionTrigger>
+                  <AccordionTrigger>What&apos;s Included</AccordionTrigger>
                   <AccordionContent>
                     <ul className="space-y-2">
                       <li className="flex items-start gap-2">

@@ -73,7 +73,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: Partial<{
+      email: string;
+      name: string;
+      phone: string;
+      role: "admin" | "user";
+    }> = {};
+
     if (email) updateData.email = email;
     if (name) updateData.name = name;
     if (phone) updateData.phone = phone;

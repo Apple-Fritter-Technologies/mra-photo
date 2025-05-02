@@ -223,7 +223,7 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="space-y-3 py-4">
-            <h3 className="text-xl font-semibold">What's Included</h3>
+            <h3 className="text-xl font-semibold">What&apos;s Included</h3>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-secondary mt-1 flex-shrink-0" />

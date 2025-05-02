@@ -173,8 +173,8 @@ const ResetPasswordPage = () => {
             </div>
             <CardTitle>Password Reset Successful</CardTitle>
             <CardDescription>
-              Your password has been successfully changed. You'll be redirected
-              to login shortly.
+              Your password has been successfully changed. You&apos;ll be
+              redirected to login shortly.
             </CardDescription>
           </CardHeader>
         </Card>
