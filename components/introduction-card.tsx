@@ -5,6 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import GalleryModal from "./gallery-modal";
 import { motion } from "motion/react";
+import { PortfolioImage } from "@/types/intrerface";
 
 interface IntroductionCardProps {
   title: string;
@@ -28,7 +29,9 @@ const IntroductionCard = ({
     setModalOpen(true);
   };
 
-  const images = [{ id: "99", url: imageUrl, title: title }];
+  const images: PortfolioImage[] = [
+    { id: "99", title: title, image_url: imageUrl },
+  ];
 
   // Animation variants
   const imageAnimationVariant = {
