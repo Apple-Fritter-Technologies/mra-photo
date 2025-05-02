@@ -171,19 +171,8 @@ const CheckoutPage = () => {
       } else {
         // Load product details
         await fetchProductDetails(packageId);
-        setProduct(await getProductById(packageId));
-        if (product) {
-          setSession({
-            packageId: product.id,
-            packageName: product.title,
-            price: product.price,
-            date: new Date(dateParam),
-            time: timeParam,
-          });
-        } else {
-          toast.error("Failed to load product details");
-          router.push("/investment");
-        }
+        const productDetails = await getProductById(packageId);
+        setProduct(productDetails);
       }
     } catch (error) {
       console.error("Error loading session data:", error);

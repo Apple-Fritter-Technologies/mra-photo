@@ -28,21 +28,38 @@ export async function POST(req: NextRequest) {
 
     // Step 1: Try to find the customer
     let customerId = null;
-    const foundCustomer = await client.customers.search({
-      query: {
-        filter: {
-          emailAddress: {
-            exact: body.user.email,
-          },
-        },
-      },
-    });
 
-    // Check if customer exists
-    if (foundCustomer?.customers && foundCustomer.customers.length > 0) {
-      // Customer found
-      customerId = foundCustomer.customers[0].id;
-      console.log("Existing customer found:", customerId);
+    const existingCustomer = await findSquareCustomer(body.user.email);
+
+    // Check if existingCustomer is undefined
+    if (!existingCustomer) {
+      console.error("Failed to find existing customer: Customer is undefined");
+      return NextResponse.json(
+        { error: "Failed to find existing customer: Customer is undefined" },
+        { status: 500 }
+      );
+    }
+
+    if ("error" in existingCustomer) {
+      console.error("Error finding existing customer:", existingCustomer.error);
+      return NextResponse.json(
+        { error: "Failed to find existing customer" },
+        { status: 500 }
+      );
+    }
+
+    // Add this type guard
+    if (!Array.isArray(existingCustomer)) {
+      console.error("Expected customer data to be an array");
+      return NextResponse.json(
+        { error: "Invalid customer data format" },
+        { status: 500 }
+      );
+    }
+
+    if (existingCustomer.length > 0) {
+      customerId = existingCustomer?.[0].id;
+      console.log("Customer found:", customerId);
     } else {
       // Customer not found, create a new one
       const newCustomer = await createCustomer({
@@ -188,6 +205,37 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+const findSquareCustomer = async (email: string) => {
+  try {
+    // Check if the customer already exists
+    const existingCustomer = await client.customers.search({
+      query: {
+        filter: {
+          emailAddress: {
+            exact: email,
+          },
+        },
+      },
+    });
+
+    if (existingCustomer.errors) {
+      console.error(
+        "Error searching for existing customer:",
+        existingCustomer.errors
+      );
+      return { error: "Failed to search for existing customer" };
+    }
+
+    return existingCustomer.customers || [];
+  } catch (error) {
+    console.error("Error searching for existing customer:", error);
+    return NextResponse.json(
+      { error: "Failed to search for existing customer", details: error },
+      { status: 500 }
+    );
+  }
+};
 
 const createCustomer = async (customerData: Customer) => {
   try {
