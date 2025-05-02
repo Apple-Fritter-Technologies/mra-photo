@@ -8,6 +8,13 @@ interface Params {
   };
 }
 
+interface UserUpdateData {
+  email?: string;
+  name?: string;
+  phone?: string;
+  role?: "admin" | "user";
+}
+
 // PATCH - Update a specific user
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
@@ -17,7 +24,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
-    const id = (await params).id;
+    // Fix: Access id directly without awaiting params
+    const id = params.id;
 
     // Check if the user has admin role or is updating their own record
     if (auth.user?.role !== "admin" && auth.user?.id !== id) {
@@ -72,8 +80,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Prepare update data
-    const updateData: any = {};
+    const updateData: UserUpdateData = {};
+
     if (email) updateData.email = email;
     if (name) updateData.name = name;
     if (phone) updateData.phone = phone;
