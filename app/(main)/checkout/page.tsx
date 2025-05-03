@@ -75,7 +75,6 @@ const CheckoutPage = () => {
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     email: "",
@@ -154,6 +153,20 @@ const CheckoutPage = () => {
 
         if (savedSession) {
           const parsedSession = JSON.parse(savedSession);
+
+          // Check if the session date is in the past
+          const sessionDate = new Date(parsedSession.date);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Reset time to start of day
+
+          if (sessionDate < today) {
+            toast.error("Cannot book a session in the past", {
+              description: "Please select a current or future date",
+            });
+            router.push("/investment");
+            return;
+          }
+
           setSession({
             ...parsedSession,
             date: new Date(parsedSession.date),
@@ -169,6 +182,19 @@ const CheckoutPage = () => {
           return;
         }
       } else {
+        // Validate date from URL parameters
+        const selectedDate = new Date(dateParam || "");
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+          toast.error("Cannot book a session in the past", {
+            description: "Please select a current or future date",
+          });
+          router.push("/investment");
+          return;
+        }
+
         // Load product details
         await fetchProductDetails(packageId);
         const productDetails = await getProductById(packageId);
@@ -183,10 +209,8 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (!isCheckingAuth) {
-      loadSessionData();
-    }
-  }, [packageId, dateParam, timeParam, router, isCheckingAuth]);
+    loadSessionData();
+  }, []);
 
   const fetchProductDetails = async (id: string) => {
     try {
@@ -291,8 +315,30 @@ const CheckoutPage = () => {
       return;
     }
 
-    setProcessing(true);
+    // Check if the session date is in the past
+    const sessionDate = new Date(session.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
+
+    if (sessionDate < today) {
+      toast.error("Cannot book a session in the past", {
+        description: "Please select a current or future date for your session",
+      });
+      return;
+    }
+
+    // Set processing state immediately to lock the UI
     setPaymentStatus("processing");
+
+    // Add window listener to prevent navigation
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue =
+        "Your payment is processing. Are you sure you want to leave?";
+      return e.returnValue;
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     try {
       // Format the phone number to E.164 format
@@ -367,13 +413,27 @@ const CheckoutPage = () => {
         description: "Please try again or contact support",
       });
     } finally {
-      setProcessing(false);
+      // Remove navigation prevention
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     }
   };
 
   const handleGoBack = () => {
     router.back();
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-slate-500 dark:text-slate-400">
+            Checking authentication...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -400,11 +460,29 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="container min-h-[80vh] max-w-6xl mx-auto px-4 py-8">
+    <div className="container min-h-[80vh] max-w-6xl mx-auto px-4 py-8 relative">
+      {paymentStatus === "processing" && (
+        <div className="fixed inset-0 bg-black/5 backdrop-blur-sm z-50 flex items-center justify-center">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center justify-center py-6 space-y-4">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <h3 className="text-xl font-semibold">Processing Payment</h3>
+                <p className="text-gray-600 text-center">
+                  Please wait while we complete your transaction. Do not close
+                  this page.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <Button
         variant="ghost"
         className="mb-6 flex items-center gap-2"
         onClick={handleGoBack}
+        disabled={paymentStatus === "processing"}
       >
         <ArrowLeft size={16} />
         Back
@@ -431,8 +509,10 @@ const CheckoutPage = () => {
                     value={customerInfo.name}
                     onChange={handleInputChange}
                     required
-                    disabled={!!user?.name}
-                    className={user ? "bg-gray-50" : ""}
+                    disabled={!!user?.name || paymentStatus === "processing"}
+                    className={
+                      user || paymentStatus === "processing" ? "bg-gray-50" : ""
+                    }
                   />
                   {user && (
                     <p className="text-xs text-muted-foreground">
@@ -450,8 +530,10 @@ const CheckoutPage = () => {
                     value={customerInfo.email}
                     onChange={handleInputChange}
                     required
-                    disabled={!!user?.email}
-                    className={user ? "bg-gray-50" : ""}
+                    disabled={!!user?.email || paymentStatus === "processing"}
+                    className={
+                      user || paymentStatus === "processing" ? "bg-gray-50" : ""
+                    }
                   />
                   {user && (
                     <p className="text-xs text-muted-foreground">
@@ -505,6 +587,15 @@ const CheckoutPage = () => {
                   <p className="text-gray-600 text-center">
                     Your booking has been confirmed. Check your email for
                     details.
+                  </p>
+                </div>
+              ) : paymentStatus === "processing" ? (
+                <div className="flex flex-col items-center justify-center py-6 space-y-4">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                  <h3 className="text-xl font-semibold">Processing Payment</h3>
+                  <p className="text-gray-600 text-center">
+                    Please wait while we complete your transaction. Do not close
+                    this page.
                   </p>
                 </div>
               ) : (

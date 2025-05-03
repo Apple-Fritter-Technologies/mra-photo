@@ -276,8 +276,8 @@ const createPayment = async (paymentData: PaymentData) => {
 
   try {
     const res = await client.payments.create({
-      idempotencyKey: randomUUID(),
       sourceId: paymentData.sourceId,
+      idempotencyKey: randomUUID(),
       amountMoney: {
         amount: paymentAmount, // todo: fixing this
         currency: "USD",
