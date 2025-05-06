@@ -1,28 +1,21 @@
-import { SquareClient } from "square";
-import { Client } from "square/legacy";
+import { SquareClient, SquareEnvironment } from "square";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { Customer, PaymentData } from "@/types/intrerface";
 import prisma from "@/lib/prisma";
 import { Order, Payment } from "@/lib/generated/prisma";
+import axios from "axios";
 
 // Handle BigInt serialization for JSON
-// (BigInt.prototype as { toJSON?: () => string }).toJSON = function () {
-//   return this.toString();
-// };
-
-(BigInt.prototype as any).toJSON = function () {
+(BigInt.prototype as { toJSON?: () => string }).toJSON = function () {
   return this.toString();
 };
 
 const client = new SquareClient({
+  baseUrl: "https://connect.squareupsandbox.com",
   token: process.env.SQUARE_ACCESS_TOKEN,
-});
-
-const legacyClient = new Client({
-  bearerAuthCredentials: {
-    accessToken: process.env.SQUARE_ACCESS_TOKEN!,
-  },
+  environment: SquareEnvironment.Sandbox,
+  version: "2025-04-16",
 });
 
 export async function POST(req: NextRequest) {
@@ -100,15 +93,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 2: Create the payment with the customer ID
-    const paymentResult = await createPayment({
+    const paymentResult = await createPaymentAPI({
       ...body,
       customerId: customerId,
     });
-
-    // const paymentResult = await legacyCreatePayment({
-    //   ...body,
-    //   customerId: customerId,
-    // });
 
     // Check if paymentResult is undefined
     if (!paymentResult) {
@@ -174,9 +162,7 @@ export async function POST(req: NextRequest) {
         time: body.order.time,
         order_status: "pending",
         currency: paymentResult?.approvedMoney?.currency || body.currency,
-        paid_amount: BigInt(
-          paymentResult?.approvedMoney?.amount || body.amount
-        ),
+        paid_amount: paymentResult?.approvedMoney?.amount || body.amount,
         payment_method: paymentResult.sourceType || "",
         payment_status: paymentResult.status,
         note: body.order.note || "",
@@ -251,12 +237,14 @@ const findSquareCustomer = async (email: string) => {
 };
 
 const createCustomer = async (customerData: Customer) => {
+  console.log("Creating customer:", customerData);
+
   try {
     const res = await client.customers.create({
       idempotencyKey: randomUUID(),
       emailAddress: customerData.email,
       givenName: customerData.name,
-      phoneNumber: customerData.phone,
+      phoneNumber: "+1-212-555-4240",
     });
 
     if (res.errors) {
@@ -271,65 +259,46 @@ const createCustomer = async (customerData: Customer) => {
   }
 };
 
-const createPayment = async (paymentData: PaymentData) => {
-  const paymentAmount = BigInt(paymentData.amount);
+const createPaymentAPI = async (paymentData: PaymentData) => {
+  const data = {
+    idempotency_key: randomUUID(),
+    source_id: paymentData.sourceId,
+    amount_money: {
+      amount: paymentData.amount,
+      currency: "USD",
+    },
+    autocomplete: true,
+    customerId: paymentData.customerId,
+    locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
+    note: paymentData.order.note,
+    buyerEmailAddress: paymentData.user.email,
+    buyerPhoneNumber: paymentData.user.phone,
+    referenceId: paymentData.user.id,
+  };
+
+  console.log("Payment data:", data);
 
   try {
-    const res = await client.payments.create({
-      idempotencyKey: randomUUID(),
-      sourceId: paymentData.sourceId,
-      amountMoney: {
-        amount: paymentAmount, // todo: fixing this
-        currency: "USD",
-      },
-      autocomplete: true,
-      customerId: paymentData.customerId,
-      locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
-      note: paymentData.order.note,
-      buyerEmailAddress: paymentData.user.email,
-      buyerPhoneNumber: paymentData.user.phone,
-      referenceId: paymentData.user.id,
-    });
+    const res = await axios.post(
+      "https://connect.squareupsandbox.com/v2/payments",
+      data,
+      {
+        headers: {
+          "Square-Version": "2025-04-16",
+          Authorization: `Bearer ${process.env.SQUARE_ACCESS_TOKEN}`,
+        },
+      }
+    );
 
-    if (res.errors) {
-      console.error("Error creating payment:", res.errors);
-      return { error: "Failed to create payment" };
+    if (res.data.errors) {
+      console.error("Error creating payment via API:", res.data.errors);
+      return { error: "Failed to create payment via API" };
     }
 
-    return res.payment;
+    return res.data.payment;
   } catch (error) {
-    console.error("Failed to create payment:", error);
-    return { error: "Failed to create payment" };
-  }
-};
-
-const legacyCreatePayment = async (paymentData: PaymentData) => {
-  const paymentAmount = BigInt(paymentData.amount);
-  try {
-    const res = await legacyClient.paymentsApi.createPayment({
-      sourceId: paymentData.sourceId,
-      idempotencyKey: randomUUID(),
-      amountMoney: {
-        amount: paymentAmount,
-        currency: "USD",
-      },
-      autocomplete: true,
-      customerId: paymentData.customerId,
-      locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
-      note: paymentData.order.note,
-      buyerEmailAddress: paymentData.user.email,
-      buyerPhoneNumber: paymentData.user.phone,
-      referenceId: paymentData.user.id,
-    });
-    if (res.result.errors) {
-      console.error("Error creating payment:", res.result.errors);
-      return { error: "Failed to create payment" };
-    }
-
-    return res.result.payment;
-  } catch (error) {
-    console.error("Failed to create payment:", error);
-    return { error: "Failed to create payment" };
+    console.error("Failed to create payment via API:", error);
+    return { error: "Failed to create payment via API" };
   }
 };
 

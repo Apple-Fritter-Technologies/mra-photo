@@ -90,7 +90,7 @@ model Order {
   order_status   String   @default("pending")
   currency       String   @default("USD")
   note           String?
-  paid_amount    BigInt
+  paid_amount    Int
   payment_method String   @default("credit_card")
   payment_status String?  @default("pending")
   created_at     DateTime @default(now())

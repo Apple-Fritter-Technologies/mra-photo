@@ -81,10 +81,31 @@ export interface Customer {
 }
 
 export interface Order {
+  id: string;
+  user_id: string;
+  user_email: string;
+  user_name?: string;
+  product_id: string;
+  product_title: string;
+  product_price: number;
   date: Date;
   time: string;
   order_status: string;
+  currency: string;
   note?: string;
+  paid_amount: number;
+  payment_status?: string;
+  payment_method: string;
+  created_at: Date;
+  User?: {
+    name?: string;
+    email: string;
+    phone?: string;
+  };
+  Product?: {
+    title: string;
+    price: number;
+  };
 }
 
 export interface SquarePaymentToken {

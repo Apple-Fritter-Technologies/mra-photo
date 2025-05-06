@@ -262,19 +262,24 @@ const CheckoutPage = () => {
     let formattedInput = "";
 
     if (digitsOnly.length <= 10) {
-      // Format as (XXX) XXX-XXXX for US numbers
-      if (digitsOnly.length > 3) {
-        formattedInput += `(${digitsOnly.substring(0, 3)})`;
-        if (digitsOnly.length > 6) {
-          formattedInput += ` ${digitsOnly.substring(
-            3,
-            6
-          )}-${digitsOnly.substring(6, 10)}`;
+      // Format as +1-xxx-xxx-xxxx for US numbers
+      if (digitsOnly.length > 0) {
+        formattedInput = "+1";
+
+        if (digitsOnly.length > 3) {
+          formattedInput += `-${digitsOnly.substring(0, 3)}`;
+
+          if (digitsOnly.length > 6) {
+            formattedInput += `-${digitsOnly.substring(
+              3,
+              6
+            )}-${digitsOnly.substring(6, 10)}`;
+          } else {
+            formattedInput += `-${digitsOnly.substring(3, digitsOnly.length)}`;
+          }
         } else {
-          formattedInput += ` ${digitsOnly.substring(3, digitsOnly.length)}`;
+          formattedInput += `-${digitsOnly}`;
         }
-      } else if (digitsOnly.length > 0) {
-        formattedInput += `(${digitsOnly}`;
       }
     } else {
       // Handle international numbers with country code
@@ -289,7 +294,7 @@ const CheckoutPage = () => {
       );
       const lineNumber = digitsOnly.substring(digitsOnly.length - 4);
 
-      formattedInput = `+${countryCode} (${areaCode}) ${prefix}-${lineNumber}`;
+      formattedInput = `+${countryCode}-${areaCode}-${prefix}-${lineNumber}`;
     }
 
     setCustomerInfo((prev) => ({
@@ -398,9 +403,7 @@ const CheckoutPage = () => {
 
         // Redirect to confirmation page after a short delay
         setTimeout(() => {
-          router.push(
-            `/booking-confirmation?id=${paymentResponse.order?.id || ""}`
-          );
+          router.push("/orders");
         }, 2000);
       } else {
         throw new Error(paymentResponse.error || "Payment failed");

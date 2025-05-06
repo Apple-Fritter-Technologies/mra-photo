@@ -1,5 +1,6 @@
 import {
   Box,
+  Boxes,
   Calendar,
   CalendarIcon,
   CameraIcon,
@@ -92,9 +93,14 @@ export const adminNavItems = [
     label: "Products",
   },
   {
-    href: "/admin/dashboard/bookings",
+    href: "/admin/dashboard/inquiry",
     icon: Calendar,
-    label: "Bookings",
+    label: "Inquiry",
+  },
+  {
+    href: "/admin/dashboard/orders",
+    icon: Boxes,
+    label: "Orders",
   },
   {
     href: "/admin/dashboard/users",
