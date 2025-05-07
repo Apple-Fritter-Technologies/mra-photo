@@ -41,6 +41,7 @@ import {
   Tag,
   DollarSign,
   Loader2,
+  MapPin,
 } from "lucide-react";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
@@ -308,6 +309,17 @@ const OrderModal: React.FC<OrderModalProps> = ({
                       {currentOrder.order_status.charAt(0).toUpperCase() +
                         currentOrder.order_status.slice(1)}
                     </Badge>
+                  </div>
+                </div>
+
+                {/* address */}
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <Label className="text-xs text-muted-foreground">
+                      Address
+                    </Label>
+                    <p>{currentOrder.address}</p>
                   </div>
                 </div>
               </div>

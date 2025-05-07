@@ -273,6 +273,14 @@ const OrdersPage = () => {
                         <TableCell>
                           <div className="max-w-[200px] font-medium">
                             {order.product_title}
+
+                            {order.address && (
+                              <div className="text-xs text-muted-foreground truncate">
+                                {order.address.length > 20
+                                  ? `${order.address.slice(0, 20)}...`
+                                  : order.address}
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>

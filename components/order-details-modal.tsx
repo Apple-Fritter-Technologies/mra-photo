@@ -218,6 +218,24 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             </div>
           </div>
 
+          {/* address */}
+          {order.address && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">
+                Your Address
+              </h3>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-secondary" />
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    Address
+                  </Label>
+                  <p className="font-medium">{order.address}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Status Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold border-b pb-2">

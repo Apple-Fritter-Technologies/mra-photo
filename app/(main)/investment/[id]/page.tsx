@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Check,
   CalendarIcon,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import ProductCard from "@/components/product-card";
@@ -42,46 +44,47 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const response = await getProducts();
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const response = await getProducts();
 
-        if (response.error) {
-          setError(true);
-          toast.error("Error fetching product details");
-          return;
-        }
-
-        const foundProduct = response.find((p: Product) => p.id === id);
-
-        if (!foundProduct) {
-          setError(true);
-          toast.error("Product not found");
-          return;
-        }
-
-        setProduct(foundProduct);
-
-        const recommendations = response.filter((p: Product) => p.id !== id);
-        setRecommendedProducts(recommendations);
-      } catch (error) {
+      if (response.error) {
         setError(true);
-        toast.error(
-          "An unexpected error occurred while fetching product details."
-        );
-      } finally {
-        setLoading(false);
+        toast.error("Error fetching product details");
+        return;
       }
-    };
 
+      const foundProduct = response.find((p: Product) => p.id === id);
+
+      if (!foundProduct) {
+        setError(true);
+        toast.error("Product not found");
+        return;
+      }
+
+      setProduct(foundProduct);
+
+      const recommendations = response.filter((p: Product) => p.id !== id);
+      setRecommendedProducts(recommendations);
+    } catch (error) {
+      setError(true);
+      toast.error(
+        "An unexpected error occurred while fetching product details."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (id) {
       fetchProduct();
     }
@@ -103,6 +106,13 @@ const ProductDetailPage = () => {
       return;
     }
 
+    if (!address) {
+      toast.error("Please provide a session location", {
+        description: "An address is required to proceed with booking",
+      });
+      return;
+    }
+
     setPaymentLoading(true);
 
     try {
@@ -112,6 +122,7 @@ const ProductDetailPage = () => {
         price: product?.price,
         date: selectedDate,
         time: selectedTime,
+        address: address,
       };
 
       // Store session details in localStorage for recovery
@@ -119,7 +130,9 @@ const ProductDetailPage = () => {
 
       // Redirect to payment page with necessary details
       router.push(
-        `/checkout?package=${id}&date=${selectedDate.toISOString()}&time=${selectedTime}`
+        `/checkout?package=${id}&date=${selectedDate.toISOString()}&time=${selectedTime}&address=${encodeURIComponent(
+          address
+        )}`
       );
     } catch (error) {
       console.error("Payment error:", error);
@@ -308,6 +321,29 @@ const ProductDetailPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 py-4 border-b border-gray-200">
+            <h3 className="text-xl font-semibold">Session Location</h3>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Address <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center">
+                <MapPin className="h-5 w-5 text-secondary mr-2" />
+                <Input
+                  placeholder="Enter session address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Enter the full address where you would like the photography
+                session to take place
+              </p>
             </div>
           </div>
 

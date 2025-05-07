@@ -200,7 +200,17 @@ const OrdersPage = () => {
         <div className="text-xs text-muted-foreground">{order.user_email}</div>
       </TableCell>
       <TableCell>
-        <div className="max-w-[200px] truncate">{order.product_title}</div>
+        <div className="max-w-[200px] truncate">
+          {order.product_title}
+
+          {order.address && (
+            <div className="text-xs text-muted-foreground truncate">
+              {order.address.length > 20
+                ? `${order.address.slice(0, 20)}...`
+                : order.address}
+            </div>
+          )}
+        </div>
       </TableCell>
       <TableCell>
         {formatCurrency(Number(order.paid_amount) / 100, order.currency)}

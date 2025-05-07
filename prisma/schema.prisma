@@ -87,6 +87,7 @@ model Order {
   product_price  Float
   date           DateTime
   time           String
+  address        String
   order_status   String   @default("pending")
   currency       String   @default("USD")
   note           String?

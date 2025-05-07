@@ -8,6 +8,7 @@ import {
   Clock,
   Image as ImageIcon,
   Loader2,
+  MapPin,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -51,6 +52,7 @@ interface CheckoutSession {
   price: number;
   date: Date;
   time: string;
+  address: string;
 }
 
 interface Product {
@@ -71,6 +73,7 @@ const CheckoutPage = () => {
   const packageId = searchParams.get("package");
   const dateParam = searchParams.get("date");
   const timeParam = searchParams.get("time");
+  const addressParam = searchParams.get("address");
 
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -237,6 +240,7 @@ const CheckoutPage = () => {
               price: res.price,
               date: dateParam ? new Date(dateParam) : new Date(),
               time: timeParam || "morning",
+              address: addressParam || "",
             }
       );
     } catch (error) {
@@ -376,6 +380,7 @@ const CheckoutPage = () => {
           time: session.time,
           order_status: "pending",
           note: customerInfo.note,
+          address: session.address,
         },
         user: {
           id: user.id,
@@ -656,6 +661,13 @@ const CheckoutPage = () => {
                       : "Evening (Golden Hour)"}
                   </span>
                 </div>
+
+                {session.address && (
+                  <div className="flex items-start gap-2 text-gray-700">
+                    <MapPin className="h-4 w-4 text-secondary mt-1" />
+                    <span className="break-words">{session.address}</span>
+                  </div>
+                )}
               </div>
 
               <Separator />

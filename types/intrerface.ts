@@ -78,6 +78,7 @@ export interface PaymentOrder {
   time: string;
   order_status: string;
   note?: string;
+  address: string;
 }
 
 export interface Customer {
@@ -103,6 +104,7 @@ export interface Order {
   paid_amount: number;
   payment_status?: string;
   payment_method: string;
+  address: string;
   created_at: Date;
   User?: {
     name?: string;
