@@ -14,16 +14,18 @@ export async function GET(req: NextRequest) {
     const totalProducts = await prisma.product.count();
     const totalPortfolios = await prisma.portfolio.count();
     const totalUsers = await prisma.user.count();
-    const totalBookings = await prisma.booking.count();
+    const totalInquiries = await prisma.booking.count();
     const totalCarousels = await prisma.carousel.count();
+    const totalOrders = await prisma.order.count();
 
     return NextResponse.json(
       {
         totalProducts,
         totalPortfolios,
         totalUsers,
-        totalBookings,
+        totalInquiries,
         totalCarousels,
+        totalOrders,
       },
       { status: 200 }
     );

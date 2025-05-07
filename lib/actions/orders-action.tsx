@@ -105,10 +105,10 @@ export const createOrder = async (orderData: {
 export const updateOrder = async (
   id: string,
   orderData: {
-    status?: string;
+    order_status?: string;
     date?: string | Date;
     time?: string;
-    payment_status?: string;
+    payment_method?: string;
   }
 ) => {
   const sessionToken = await getSessionToken();

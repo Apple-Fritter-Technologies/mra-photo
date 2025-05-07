@@ -116,6 +116,13 @@ export const BookingStatusOptions = [
   "cancelled",
 ];
 
+export const OrderStatusOptions = [
+  "pending",
+  "processing",
+  "completed",
+  "cancelled",
+];
+
 export const dashboardQuickAction = [
   {
     icon: CameraIcon,
@@ -145,6 +152,12 @@ export const dashboardQuickAction = [
     icon: User,
     label: "Manage Users",
     href: "/admin/dashboard/users",
+    color: "bg-purple-500/10 text-purple-500",
+  },
+  {
+    icon: CalendarIcon,
+    label: "Manage Orders",
+    href: "/admin/dashboard/orders",
     color: "bg-purple-500/10 text-purple-500",
   },
 ];

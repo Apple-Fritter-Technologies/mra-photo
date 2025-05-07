@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,29 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Loader2,
-  RefreshCcw,
-  Search,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-} from "lucide-react";
-import { toast } from "sonner";
 import { format } from "date-fns";
+import { Filter, Loader2, Pencil, RefreshCcw, Search } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
-import OrderModal from "../../components/order-modal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -39,9 +23,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getOrders } from "@/lib/actions/orders-action";
+import { formatCurrency } from "@/lib/utils";
 import { Order } from "@/types/intrerface";
+import OrderModal from "../../components/order-modal";
 
 // Helper functions
 const getStatusBadgeColor = (status: string) => {
@@ -60,11 +52,16 @@ const getStatusBadgeColor = (status: string) => {
 };
 
 const getPaymentStatusBadgeColor = (status: string) => {
-  switch (status) {
-    case "paid":
-      return "bg-green-100 text-green-800";
+  // payment status: APPROVED, PENDING, COMPLETED, CANCELED, or FAILED
+
+  switch (status.toLowerCase()) {
+    case "approved":
+      return "bg-blue-100 text-blue-800";
     case "pending":
       return "bg-yellow-100 text-yellow-800";
+    case "completed":
+      return "bg-green-100 text-green-800";
+    case "canceled":
     case "failed":
       return "bg-red-100 text-red-800";
     default:
@@ -74,21 +71,18 @@ const getPaymentStatusBadgeColor = (status: string) => {
 
 const OrdersPage = () => {
   // State variables
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [allOrders, setAllOrders] = useState<Order[]>([]); // Store all orders
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]); // Store filtered orders
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
 
-  const ordersPerPage = 10;
-
-  // Fetch orders from API
+  // Fetch all orders from API once
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -102,39 +96,8 @@ const OrdersPage = () => {
         return;
       }
 
-      // Filter orders based on search and status
-      let filteredOrders = response;
-
-      if (searchTerm) {
-        filteredOrders = filteredOrders.filter(
-          (order: Order) =>
-            order.product_title
-              ?.toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            order.user_email
-              ?.toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            order.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.id.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      if (statusFilter !== "all") {
-        filteredOrders = filteredOrders.filter(
-          (order: Order) => order.order_status === statusFilter
-        );
-      }
-
-      // Calculate pagination
-      const totalItems = filteredOrders.length;
-      setTotalPages(Math.ceil(totalItems / ordersPerPage));
-
-      // Get current page items
-      const start = (currentPage - 1) * ordersPerPage;
-      const end = start + ordersPerPage;
-      const paginatedOrders = filteredOrders.slice(start, end);
-
-      setOrders(paginatedOrders);
+      setAllOrders(response);
+      applyFilters(response, searchTerm, statusFilter);
     } catch (error) {
       console.error("Error fetching orders:", error);
       setError(true);
@@ -142,22 +105,50 @@ const OrdersPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, searchTerm]);
+  }, []);
+
+  // Apply filters to the orders without making new API calls
+  const applyFilters = useCallback(
+    (orders: Order[], search: string, status: string) => {
+      let result = [...orders];
+
+      if (search) {
+        const searching = search.toLowerCase();
+
+        result = result.filter(
+          (order: Order) =>
+            order.id.toLowerCase().includes(searching) ||
+            order.user_email?.toLowerCase().includes(searching) ||
+            order.user_name?.toLowerCase().includes(searching) ||
+            order.product_title?.toLowerCase().includes(searching) ||
+            order.time.toLowerCase().includes(searching) ||
+            String(order.paid_amount).includes(searching) ||
+            order.order_status.toLowerCase().includes(searching) ||
+            format(new Date(order.date), "MMM dd, yyyy")
+              .toLowerCase()
+              .includes(searching)
+        );
+      }
+
+      if (status !== "all") {
+        result = result.filter((order: Order) => order.order_status === status);
+      }
+
+      setFilteredOrders(result);
+    },
+    []
+  );
 
   // Handlers
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
-    setCurrentPage(1); // Reset to first page when filtering
+    applyFilters(allOrders, searchTerm, value);
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1); // Reset to first page when searching
-    fetchOrders();
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    applyFilters(allOrders, value, statusFilter);
   };
 
   const handleUpdateOrder = (order: Order) => {
@@ -181,40 +172,6 @@ const OrdersPage = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
-
-  // Component parts
-  const renderSearchBar = () => (
-    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border p-4">
-      <h1 className="text-2xl font-bold">Order Management</h1>
-
-      <div className="flex items-center gap-2 w-full sm:w-auto">
-        <div className="relative flex-1 sm:flex-none sm:min-w-[300px]">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search orders..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch(e);
-              }
-            }}
-          />
-        </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={refreshOrders}
-          disabled={refreshing || loading}
-        >
-          <RefreshCcw
-            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-          />
-        </Button>
-      </div>
-    </div>
-  );
 
   const renderTableHeader = () => (
     <TableHeader>
@@ -276,47 +233,33 @@ const OrdersPage = () => {
     </TableRow>
   );
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    return (
-      <div className="flex items-center justify-center space-x-2 mt-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center space-x-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              variant={currentPage === page ? "default" : "outline"}
-              size="sm"
-              onClick={() => handlePageChange(page)}
-              className="w-8 h-8 p-0"
-            >
-              {page}
-            </Button>
-          ))}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      {renderSearchBar()}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border p-4">
+        <h1 className="text-2xl font-bold">Order Management</h1>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none sm:min-w-[300px]">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search orders..."
+              value={searchTerm}
+              onChange={handleSearchInputChange}
+              className="pl-8"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={refreshOrders}
+            disabled={refreshing || loading}
+          >
+            <RefreshCcw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+          </Button>
+        </div>
+      </div>
 
       <Card>
         <CardHeader className="pb-3">
@@ -366,7 +309,7 @@ const OrdersPage = () => {
             </div>
           )}
 
-          {!loading && !error && orders.length === 0 ? (
+          {!loading && !error && filteredOrders.length === 0 ? (
             <div className="text-center py-12 bg-muted/50 rounded-lg">
               <h3 className="text-lg font-medium">No orders found</h3>
               <p className="text-sm text-muted-foreground mt-2">
@@ -380,13 +323,11 @@ const OrdersPage = () => {
               <Table>
                 {renderTableHeader()}
                 <TableBody>
-                  {orders.map((order) => renderTableRow(order))}
+                  {filteredOrders.map((order) => renderTableRow(order))}
                 </TableBody>
               </Table>
             </div>
           )}
-
-          {renderPagination()}
         </CardContent>
       </Card>
 

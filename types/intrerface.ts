@@ -67,10 +67,17 @@ export interface PaymentData {
   sourceId: string;
   amount: number;
   product: OrderProduct;
-  order: Order;
+  order: PaymentOrder;
   user: Customer;
   currency: string;
   customerId?: string;
+}
+
+export interface PaymentOrder {
+  date: Date;
+  time: string;
+  order_status: string;
+  note?: string;
 }
 
 export interface Customer {

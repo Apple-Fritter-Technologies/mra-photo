@@ -35,22 +35,77 @@ const AccountPage = () => {
   // Current values
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+1");
   const [email, setEmail] = useState("");
 
   // Original values for comparison
   const [originalName, setOriginalName] = useState("");
   const [originalPhone, setOriginalPhone] = useState("");
+  const [originalCountryCode, setOriginalCountryCode] = useState("+1");
   const [originalEmail, setOriginalEmail] = useState("");
 
   useEffect(() => {
     if (user) {
       // Set both current and original values
       setName(user.name || "");
-      setPhone(user.phone || "");
       setEmail(user.email || "");
 
+      // Parse phone number if it exists
+      if (user.phone) {
+        // Check if phone number already has a country code
+        if (user.phone.startsWith("+")) {
+          // Extract country code and phone number
+          const parts = user.phone.split("-");
+          const code = parts[0];
+          const phoneNumber = parts.slice(1).join("");
+
+          // Format the phone number portion
+          let formattedPhone = phoneNumber.replace(/\D/g, "");
+          if (formattedPhone.length > 6) {
+            formattedPhone = `${formattedPhone.slice(
+              0,
+              3
+            )}-${formattedPhone.slice(3, 6)}-${formattedPhone.slice(6)}`;
+          } else if (formattedPhone.length > 3) {
+            formattedPhone = `${formattedPhone.slice(
+              0,
+              3
+            )}-${formattedPhone.slice(3)}`;
+          }
+
+          setCountryCode(code);
+          setPhone(formattedPhone);
+          setOriginalCountryCode(code);
+          setOriginalPhone(formattedPhone);
+        } else {
+          // If no country code, use default +1
+          // Format the phone number
+          let formattedPhone = user.phone.replace(/\D/g, "");
+          if (formattedPhone.length > 6) {
+            formattedPhone = `${formattedPhone.slice(
+              0,
+              3
+            )}-${formattedPhone.slice(3, 6)}-${formattedPhone.slice(6)}`;
+          } else if (formattedPhone.length > 3) {
+            formattedPhone = `${formattedPhone.slice(
+              0,
+              3
+            )}-${formattedPhone.slice(3)}`;
+          }
+
+          setCountryCode("+1");
+          setPhone(formattedPhone);
+          setOriginalCountryCode("+1");
+          setOriginalPhone(formattedPhone);
+        }
+      } else {
+        setCountryCode("+1");
+        setPhone("");
+        setOriginalCountryCode("+1");
+        setOriginalPhone("");
+      }
+
       setOriginalName(user.name || "");
-      setOriginalPhone(user.phone || "");
       setOriginalEmail(user.email || "");
     }
   }, [user]);
@@ -60,6 +115,7 @@ const AccountPage = () => {
     return (
       name !== originalName ||
       phone !== originalPhone ||
+      countryCode !== originalCountryCode ||
       email !== originalEmail
     );
   };
@@ -114,15 +170,43 @@ const AccountPage = () => {
     // Remove any non-digit characters for validation
     const digitsOnly = phone.replace(/\D/g, "");
 
-    // Check if the resulting string has a valid length of 10 to 15 digits
-    return digitsOnly.length >= 10 && digitsOnly.length <= 15;
+    // Check if the resulting string has a valid length (for US/Canada numbers typically 10 digits)
+    return digitsOnly.length >= 7 && digitsOnly.length <= 15;
   };
 
-  // Format phone input to allow only numbers
+  // Format phone input to allow only numbers and format it
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove any non-digit characters from input
-    const formattedPhone = e.target.value.replace(/\D/g, "");
+    let formattedPhone = e.target.value.replace(/\D/g, "");
+
+    // Format: xxx-xxx-xxxx (if long enough)
+    if (formattedPhone.length > 6) {
+      formattedPhone = `${formattedPhone.slice(0, 3)}-${formattedPhone.slice(
+        3,
+        6
+      )}-${formattedPhone.slice(6)}`;
+    } else if (formattedPhone.length > 3) {
+      formattedPhone = `${formattedPhone.slice(0, 3)}-${formattedPhone.slice(
+        3
+      )}`;
+    }
+
     setPhone(formattedPhone);
+  };
+
+  // Handle country code change
+  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+
+    // Ensure the country code starts with +
+    if (!value.startsWith("+")) {
+      value = "+" + value;
+    }
+
+    // Only allow + and digits
+    value = "+" + value.slice(1).replace(/[^\d]/g, "");
+
+    setCountryCode(value);
   };
 
   // Email validation function
@@ -156,10 +240,13 @@ const AccountPage = () => {
 
     setIsSaving(true);
 
+    // Format the full phone number with country code
+    const fullPhoneNumber = phone ? `${countryCode}-${phone}` : "";
+
     try {
       const result = await updateUser(user.id, {
         name,
-        phone,
+        phone: fullPhoneNumber,
         email,
       });
 
@@ -169,7 +256,7 @@ const AccountPage = () => {
         toast.success("Profile updated successfully");
         setUser({
           ...user,
-          phone,
+          phone: fullPhoneNumber,
           name,
           email,
         });
@@ -177,6 +264,7 @@ const AccountPage = () => {
         // Update original values after successful save
         setOriginalName(name);
         setOriginalPhone(phone);
+        setOriginalCountryCode(countryCode);
         setOriginalEmail(email);
       }
     } catch (error) {
@@ -276,19 +364,31 @@ const AccountPage = () => {
               {/* Phone number input field */}
               <div className="space-y-1">
                 <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <Input
-                    id="phone"
-                    name="phone"
-                    className="pl-10"
-                    placeholder="Your phone number"
-                    value={phone}
-                    onChange={handlePhoneChange}
-                  />
+                <div className="flex gap-2 items-center bg-slate-50 dark:bg-slate-800 p-3 rounded-md">
+                  <Phone className="h-4 w-4 text-slate-500" />
+                  <div className="relative w-24">
+                    <Input
+                      id="countryCode"
+                      name="countryCode"
+                      placeholder="+1"
+                      value={countryCode}
+                      maxLength={5}
+                      onChange={handleCountryCodeChange}
+                    />
+                  </div>
+                  <div className="relative flex-1">
+                    <Input
+                      id="phone"
+                      name="phone"
+                      placeholder="123-456-7890"
+                      value={phone}
+                      maxLength={15}
+                      onChange={handlePhoneChange}
+                    />
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Enter digits only (e.g., 1234567890)
+                  Format: {countryCode}-xxx-xxx-xxxx
                 </p>
               </div>
 

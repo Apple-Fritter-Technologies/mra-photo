@@ -28,8 +28,9 @@ interface DashboardData {
   totalProducts: number;
   totalPortfolios: number;
   totalUsers: number;
-  totalBookings: number;
+  totalInquiries: number;
   totalCarousels: number;
+  totalOrders: number;
 }
 
 const fadeIn = {
@@ -65,9 +66,9 @@ export default function DashboardPage() {
       color: "bg-purple-500/10 text-purple-500",
     },
     {
-      title: "Total Bookings",
-      value: data?.totalBookings,
-      description: "Total number of bookings made",
+      title: "Total Inquiries",
+      value: data?.totalInquiries,
+      description: "Total number of inquiries made",
       icon: <CalendarIcon size={20} />,
       color: "bg-orange-500/10 text-orange-500",
     },
@@ -77,6 +78,13 @@ export default function DashboardPage() {
       description: "Total number of images in the carousel",
       icon: <PackageIcon size={20} />,
       color: "bg-red-500/10 text-red-500",
+    },
+    {
+      title: "Total Orders",
+      value: data?.totalOrders,
+      description: "Total number of orders placed",
+      icon: <PackageIcon size={20} />,
+      color: "bg-yellow-500/10 text-yellow-500",
     },
   ];
 

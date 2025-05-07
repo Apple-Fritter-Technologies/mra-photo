@@ -48,6 +48,8 @@ export async function GET(req: NextRequest) {
       const orders = await prisma.order.findMany({
         where: { user_id: userId },
         include: { Product: true },
+
+        orderBy: { created_at: "desc" },
       });
 
       return NextResponse.json(orders, { status: 200 });
@@ -62,6 +64,7 @@ export async function GET(req: NextRequest) {
 
       const orders = await prisma.order.findMany({
         include: { Product: true, User: true },
+        orderBy: { updated_at: "desc" },
       });
 
       return NextResponse.json(orders, { status: 200 });
@@ -124,10 +127,6 @@ export async function PUT(req: NextRequest) {
         order_status: body.order_status,
         date: body.date ? new Date(body.date) : undefined,
         time: body.time,
-        payment_status: body.payment_status,
-        note: body.note,
-        user_name: body.user_name,
-        user_phone: body.user_phone,
         payment_method: body.payment_method,
       },
     });
