@@ -214,8 +214,9 @@ const OrdersPage = () => {
             <CardTitle>Your Photography Bookings</CardTitle>
             <CardDescription>
               Here you can view all your photography bookings and their current
-              status. Click on "View Details" to see complete information about
-              your session, including location and special requests.
+              status. Click on &quot;View Details&quot; to see complete
+              information about your session, including location and special
+              requests.
             </CardDescription>
           </CardHeader>
 
@@ -223,7 +224,7 @@ const OrdersPage = () => {
             {orders.length === 0 ? (
               <div className="text-center py-12">
                 <p className="mt-4 text-lg font-medium">
-                  You don't have any orders yet
+                  You don&apos;t have any orders yet
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Browse our photography services and book your first session
