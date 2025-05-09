@@ -146,7 +146,7 @@ const UserLoginPage = () => {
             Photography MRA
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
-            Sign in to your account
+            Log in to your account
           </p>
         </div>
 
@@ -238,7 +238,7 @@ const UserLoginPage = () => {
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Logging in..." : "Log in"}
               </Button>
             </form>
           </CardContent>
@@ -258,7 +258,7 @@ const UserLoginPage = () => {
               </Button>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-              By signing in, you agree to our Terms of Service and Privacy
+              By Logging in, you agree to our Terms of Service and Privacy
               Policy.
             </p>
           </CardFooter>

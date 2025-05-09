@@ -60,6 +60,8 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [countryCode, setCountryCode] = useState("+1");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -103,12 +105,59 @@ const RegisterPage = () => {
     checkAuthStatus();
   }, []);
 
+  // Format phone input to allow only numbers and format it
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove any non-digit characters from input
+    let formattedPhone = e.target.value.replace(/\D/g, "");
+
+    // Format: xxx-xxx-xxxx (if long enough)
+    if (formattedPhone.length > 6) {
+      formattedPhone = `${formattedPhone.slice(0, 3)}-${formattedPhone.slice(
+        3,
+        6
+      )}-${formattedPhone.slice(6)}`;
+    } else if (formattedPhone.length > 3) {
+      formattedPhone = `${formattedPhone.slice(0, 3)}-${formattedPhone.slice(
+        3
+      )}`;
+    }
+
+    setPhoneNumber(formattedPhone);
+    // Update the form value with the full phone number
+    form.setValue(
+      "phone",
+      formattedPhone ? `${countryCode}-${formattedPhone}` : ""
+    );
+  };
+
+  // Handle country code change
+  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+
+    // Ensure the country code starts with +
+    if (!value.startsWith("+")) {
+      value = "+" + value;
+    }
+
+    // Only allow + and digits
+    value = "+" + value.slice(1).replace(/[^\d]/g, "");
+
+    setCountryCode(value);
+    // Update the form value with the full phone number
+    form.setValue("phone", phoneNumber ? `${value}-${phoneNumber}` : "");
+  };
+
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
 
     try {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...userData } = data;
+
+      // Ensure phone is formatted correctly with country code
+      if (phoneNumber) {
+        userData.phone = `${countryCode}-${phoneNumber}`;
+      }
 
       const response = await createUser(userData);
 
@@ -223,18 +272,36 @@ const RegisterPage = () => {
                 <Label htmlFor="phone" className="text-sm font-medium">
                   Phone Number (Optional)
                 </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <Input
-                    id="phone"
-                    className="pl-10"
-                    placeholder="+1 (555) 123-4567"
-                    {...form.register("phone")}
-                    disabled={isLoading}
-                  />
+                <div className="flex gap-2 items-center bg-slate-50 dark:bg-slate-800 p-3 rounded-md">
+                  <Phone className="h-4 w-4 text-slate-500" />
+                  <div className="relative w-24">
+                    <Input
+                      id="countryCode"
+                      name="countryCode"
+                      placeholder="+1"
+                      value={countryCode}
+                      maxLength={5}
+                      onChange={handleCountryCodeChange}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="relative flex-1">
+                    <Input
+                      id="phone"
+                      name="phone"
+                      placeholder="123-456-7890"
+                      value={phoneNumber}
+                      maxLength={15}
+                      onChange={handlePhoneChange}
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
+                <p className="text-xs text-slate-500">
+                  Format: {countryCode}-xxx-xxx-xxxx
+                </p>
                 {form.formState.errors.phone && (
-                  <p className="text-xs text-red-500 mt-1">
+                  <p className="text-xs text-red-500">
                     {form.formState.errors.phone.message}
                   </p>
                 )}

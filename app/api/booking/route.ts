@@ -1,3 +1,5 @@
+import { inquiryEmailHtml, sendInquiryEmail } from "@/lib/email";
+import { Booking } from "@/lib/generated/prisma";
 import prisma from "@/lib/prisma";
 import { verifyAuth } from "@/lib/server-service";
 
@@ -76,20 +78,30 @@ export async function POST(req: NextRequest) {
     // Parse date string to Date object
     const bookingDate = new Date(date);
 
+    const bookingPayload = {
+      name,
+      email,
+      date: bookingDate,
+      time,
+      product_id,
+      session_name,
+      heard_from,
+      message,
+      status: "pending", // Default status
+    };
+
     // Create booking
     const booking = await prisma.booking.create({
-      data: {
-        name,
-        email,
-        date: bookingDate,
-        time,
-        product_id,
-        session_name,
-        heard_from,
-        message,
-        status: "pending", // Default status
-      },
+      data: bookingPayload,
       include: { Product: true },
+    });
+
+    // Send confirmation email
+    await sendInquiryConfirmationEmail({
+      ...bookingPayload,
+      id: booking.id,
+      created_at: booking.created_at,
+      updated_at: booking.updated_at,
     });
 
     return NextResponse.json(booking, { status: 201 });
@@ -237,3 +249,18 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
+
+const sendInquiryConfirmationEmail = async (inquiry: Booking) => {
+  try {
+    // send email to the user and bcc to the admin
+    const emailPayload = {
+      to: inquiry.email,
+      subject: `New Inquiry - ${inquiry.session_name}`,
+      html: inquiryEmailHtml(inquiry),
+    };
+
+    await sendInquiryEmail(emailPayload);
+  } catch (error) {
+    console.error("Error sending inquiry email:", error);
+  }
+};

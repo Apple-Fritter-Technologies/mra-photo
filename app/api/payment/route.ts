@@ -5,6 +5,7 @@ import { Customer, PaymentData } from "@/types/intrerface";
 import prisma from "@/lib/prisma";
 import { Order, Payment } from "@/lib/generated/prisma";
 import axios from "axios";
+import { orderEmailHtml, sendOrderEmail } from "@/lib/email";
 
 // Handle BigInt serialization for JSON
 (BigInt.prototype as { toJSON?: () => string }).toJSON = function () {
@@ -188,6 +189,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Send order confirmation email
+      await sendOrderConfirmationEmail({
+        ...orderData,
+        id: createdOrder.id,
+        created_at: createdOrder.created_at,
+        updated_at: createdOrder.updated_at,
+      });
+
       return NextResponse.json({
         success: true,
         payment: paymentResult,
@@ -277,8 +286,6 @@ const createPaymentAPI = async (paymentData: PaymentData) => {
     referenceId: paymentData.user.id,
   };
 
-  console.log("Payment data:", data);
-
   try {
     const res = await axios.post(
       "https://connect.squareupsandbox.com/v2/payments",
@@ -355,5 +362,20 @@ const createOrder = async (orderData: Order) => {
   } catch (error) {
     console.error("Error creating order:", error);
     return { error: "Failed to create order" };
+  }
+};
+
+const sendOrderConfirmationEmail = async (orderData: Order) => {
+  try {
+    // send email to the user and bcc to the admin
+    const emailPayload = {
+      to: orderData.user_email,
+      subject: `Order Confirmation - ${orderData.product_title}`,
+      html: orderEmailHtml(orderData),
+    };
+
+    await sendOrderEmail(emailPayload);
+  } catch (error) {
+    console.error("Error sending order confirmation email:", error);
   }
 };

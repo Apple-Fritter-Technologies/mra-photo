@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { emailHtml, sendEmail } from "@/lib/email";
+import { forgotEmailHtml, sendForgotEmail } from "@/lib/email";
 import prisma from "@/lib/prisma";
 import { ApiUrl } from "@/lib/utils";
 
@@ -47,10 +47,10 @@ export async function POST(request: Request) {
     const resetUrl = `${ApiUrl}/reset-password?token=${resetToken}`;
 
     // Send email with reset link
-    await sendEmail({
+    await sendForgotEmail({
       to: user.email,
       subject: "Password Reset Request",
-      html: emailHtml({
+      html: forgotEmailHtml({
         name: user.name || undefined,
         resetUrl,
       }),

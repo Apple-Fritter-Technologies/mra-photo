@@ -186,8 +186,7 @@ const BookingsPage = () => {
               {filteredBookings.map((booking) => (
                 <tr
                   key={booking.id}
-                  className="border-b hover:bg-muted/30 transition-colors cursor-pointer"
-                  onClick={() => handleViewBooking(booking)}
+                  className="border-b hover:bg-muted/30 transition-colors"
                 >
                   <td className="p-4">
                     <div>
@@ -228,7 +227,7 @@ const BookingsPage = () => {
                   </td>
                   <td className="p-4 text-right">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();

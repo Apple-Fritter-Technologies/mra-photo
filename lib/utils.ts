@@ -13,3 +13,5 @@ export function formatCurrency(amount: number, currency: string = "USD") {
     currency: currency,
   }).format(amount);
 }
+
+export const defaultEmail = "nikhil1010010001@gmail.com";

@@ -131,12 +131,6 @@ export const dashboardQuickAction = [
     color: "bg-blue-500/10 text-blue-500",
   },
   {
-    icon: CalendarIcon,
-    label: "Manage Bookings",
-    href: "/admin/dashboard/bookings",
-    color: "bg-amber-500/10 text-amber-500",
-  },
-  {
     icon: PackageIcon,
     label: "Manage Products",
     href: "/admin/dashboard/products",
@@ -153,6 +147,12 @@ export const dashboardQuickAction = [
     label: "Manage Users",
     href: "/admin/dashboard/users",
     color: "bg-purple-500/10 text-purple-500",
+  },
+  {
+    icon: CalendarIcon,
+    label: "Manage inquiries",
+    href: "/admin/dashboard/inquiry",
+    color: "bg-amber-500/10 text-amber-500",
   },
   {
     icon: CalendarIcon,

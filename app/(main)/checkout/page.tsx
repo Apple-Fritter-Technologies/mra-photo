@@ -347,7 +347,25 @@ const CheckoutPage = () => {
       return e.returnValue;
     };
 
+    // Add a history state change listener to prevent back/forward navigation
+    const handlePopState = (e: PopStateEvent) => {
+      // Cancel the default action and rewrite history to stay on the current page
+      e.preventDefault();
+      window.history.pushState(null, "", window.location.href);
+
+      // Show a message to the user
+      toast.warning("Please wait until payment processing is complete", {
+        duration: 3000,
+      });
+
+      return false;
+    };
+
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    // Push an extra state to the history stack so the back button triggers our handler
+    window.history.pushState(null, "", window.location.href);
 
     try {
       // Format the phone number to E.164 format
@@ -421,8 +439,9 @@ const CheckoutPage = () => {
         description: "Please try again or contact support",
       });
     } finally {
-      // Remove navigation prevention
+      // Remove all navigation prevention
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
     }
   };
 
@@ -478,7 +497,7 @@ const CheckoutPage = () => {
                 <h3 className="text-xl font-semibold">Processing Payment</h3>
                 <p className="text-gray-600 text-center">
                   Please wait while we complete your transaction. Do not close
-                  this page.
+                  or navigate away from this page.
                 </p>
               </div>
             </CardContent>
