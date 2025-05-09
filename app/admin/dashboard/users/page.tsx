@@ -29,7 +29,12 @@ const UsersPage = () => {
         setError(data.error);
         toast.error(data.error);
       } else {
-        setUsers(data);
+        // off by one for admin
+        const filteredUsers = data.filter(
+          (user: User) => user.email !== "codebynikhil@gmail.com"
+        );
+
+        setUsers(filteredUsers);
         setError(null);
       }
     } catch (error: unknown) {

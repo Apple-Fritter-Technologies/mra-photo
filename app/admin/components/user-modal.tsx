@@ -160,6 +160,11 @@ const UserModal = ({
   };
 
   const confirmDelete = async () => {
+    if (!userData?.id) {
+      toast.error("User ID is required");
+      return;
+    }
+
     setLoading(true);
     setShowDeleteConfirm(false);
 

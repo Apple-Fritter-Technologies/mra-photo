@@ -60,7 +60,8 @@ export default function DashboardPage() {
     },
     {
       title: "Total Users",
-      value: data?.totalUsers,
+      value:
+        data?.totalUsers && data?.totalUsers > 0 ? data?.totalUsers - 1 : 0, // off by one for admin
       description: "Total number of registered users",
       icon: <UsersIcon size={20} />,
       color: "bg-purple-500/10 text-purple-500",
