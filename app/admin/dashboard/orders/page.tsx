@@ -452,9 +452,9 @@ const OrdersPage = () => {
           <CardFooter className="text-sm text-muted-foreground border-t pt-4">
             Showing {filteredOrders.length} of {allOrders.length} orders
             {statusFilter !== "all" && (
-              <> filtered by "{statusFilter}" status</>
+              <> filtered by &quot;{statusFilter}&quot; status</>
             )}
-            {searchTerm && <> matching "{searchTerm}"</>}
+            {searchTerm && <> matching &quot;{searchTerm}&quot;</>}
           </CardFooter>
         )}
       </Card>
