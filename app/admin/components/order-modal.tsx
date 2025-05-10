@@ -176,7 +176,7 @@ const OrderModal: React.FC<OrderModalProps> = ({
   return (
     <>
       <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
-        <DialogContent className="max-w-md sm:max-w-lg md:max-w-2xl">
+        <DialogContent className="max-w-md sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
             <DialogDescription>Order ID: {currentOrder.id}</DialogDescription>

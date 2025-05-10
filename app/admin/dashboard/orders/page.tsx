@@ -12,7 +12,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Filter, Loader2, Pencil, RefreshCcw, Search } from "lucide-react";
+import {
+  Filter,
+  Loader2,
+  Pencil,
+  RefreshCcw,
+  Search,
+  Calendar,
+  User,
+  Camera,
+  CreditCard,
+} from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +32,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Select,
@@ -245,8 +256,9 @@ const OrdersPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border p-4">
-        <h1 className="text-2xl font-bold">Order Management</h1>
+      {/* Header section with search and refresh */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border p-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Order Management</h1>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[300px]">
@@ -263,6 +275,7 @@ const OrdersPage = () => {
             size="icon"
             onClick={refreshOrders}
             disabled={refreshing || loading}
+            title="Refresh orders"
           >
             <RefreshCcw
               className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
@@ -277,11 +290,11 @@ const OrdersPage = () => {
           <CardDescription className="flex flex-wrap items-center gap-2 justify-between">
             <span>Manage customer orders and their statuses</span>
 
-            {/* filter */}
-            <div className="flex items-center gap-2">
+            {/* Filter dropdown - now more mobile-friendly */}
+            <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Select value={statusFilter} onValueChange={handleStatusChange}>
-                <SelectTrigger id="status-filter" className="mt-1">
+                <SelectTrigger id="status-filter" className="w-full">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -297,6 +310,7 @@ const OrdersPage = () => {
         </CardHeader>
 
         <CardContent>
+          {/* Error state */}
           {error && (
             <div className="text-red-500 text-center py-4 bg-muted/50 rounded-lg">
               <p>Error fetching orders. Please try again.</p>
@@ -313,12 +327,14 @@ const OrdersPage = () => {
             </div>
           )}
 
+          {/* Loading state */}
           {loading && (
             <div className="flex justify-center items-center h-64">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
 
+          {/* Empty state - No orders found */}
           {!loading && !error && filteredOrders.length === 0 ? (
             <div className="text-center py-12 bg-muted/50 rounded-lg">
               <h3 className="text-lg font-medium">No orders found</h3>
@@ -329,16 +345,118 @@ const OrdersPage = () => {
               </p>
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                {renderTableHeader()}
-                <TableBody>
-                  {filteredOrders.map((order) => renderTableRow(order))}
-                </TableBody>
-              </Table>
-            </div>
+            <>
+              {/* Desktop view - Table (hidden on mobile) */}
+              <div className="hidden lg:block rounded-md border overflow-x-auto">
+                <Table>
+                  {renderTableHeader()}
+                  <TableBody>
+                    {filteredOrders.map((order) => renderTableRow(order))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile view - Cards (visible only on small screens) */}
+              <div className="lg:hidden space-y-4">
+                {filteredOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="border rounded-lg p-4 bg-card shadow-sm"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {format(new Date(order.date), "MMM dd, yyyy")}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {order.time}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Badge
+                        className={getStatusBadgeColor(order.order_status)}
+                      >
+                        {order.order_status.charAt(0).toUpperCase() +
+                          order.order_status.slice(1)}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2 mb-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="overflow-hidden">
+                          <div className="font-medium truncate">
+                            {order.user_name || "N/A"}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {order.user_email}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2"></div>
+                      <Camera className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="overflow-hidden">
+                        <div className="truncate">{order.product_title}</div>
+                        {order.address && (
+                          <div className="text-xs text-muted-foreground truncate">
+                            {order.address}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="font-medium">
+                          {formatCurrency(
+                            Number(order.paid_amount) / 100,
+                            order.currency
+                          )}
+                        </span>
+                      </div>
+
+                      <Badge
+                        className={getPaymentStatusBadgeColor(
+                          order.payment_status || "pending"
+                        )}
+                      >
+                        {(order.payment_status || "pending")
+                          .charAt(0)
+                          .toUpperCase() +
+                          (order.payment_status || "pending").slice(1)}
+                      </Badge>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleUpdateOrder(order)}
+                      className="w-full mt-2"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Manage Order
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
+
+        {!loading && !error && filteredOrders.length > 0 && (
+          <CardFooter className="text-sm text-muted-foreground border-t pt-4">
+            Showing {filteredOrders.length} of {allOrders.length} orders
+            {statusFilter !== "all" && (
+              <> filtered by "{statusFilter}" status</>
+            )}
+            {searchTerm && <> matching "{searchTerm}"</>}
+          </CardFooter>
+        )}
       </Card>
 
       {/* Order Modal Component */}

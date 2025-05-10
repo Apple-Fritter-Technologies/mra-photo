@@ -139,7 +139,7 @@ const CarouselModal = ({
           setOpen(isOpen);
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90%] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {isEditing ? "Edit Carousel Image" : "Add Carousel Image"}

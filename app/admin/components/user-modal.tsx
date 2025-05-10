@@ -193,7 +193,7 @@ const UserModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90%] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Update User Role</DialogTitle>
           </DialogHeader>

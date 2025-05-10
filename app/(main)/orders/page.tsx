@@ -11,7 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { ExternalLink, Loader2, CalendarIcon, CreditCard } from "lucide-react";
+import {
+  ExternalLink,
+  Loader2,
+  CalendarIcon,
+  CreditCard,
+  MapPin,
+  Clock,
+} from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -23,7 +30,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { getOrders, getUserOrders } from "@/lib/actions/orders-action";
+import { getUserOrders } from "@/lib/actions/orders-action";
 import { formatCurrency } from "@/lib/utils";
 import { Order } from "@/types/intrerface";
 import OrderDetailsModal from "@/components/order-details-modal";
@@ -82,13 +89,14 @@ const getStatusDescription = (status: string) => {
 const OrdersPage = () => {
   const router = useRouter();
 
-  const { token, setToken, logout, user } = useUserStore();
+  const { token, setToken, logout, user, setUser } = useUserStore();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const checkAuthStatus = async () => {
     setIsCheckingAuth(true);
@@ -108,6 +116,14 @@ const OrdersPage = () => {
         if (res.authorized) {
           if (!token) {
             setToken(tokenToVerify);
+          }
+
+          // Important: Set the user data including ID if not already present
+          if (res.user && (!user || !user.id)) {
+            setUser(res.user);
+            setUserId(res.user.id);
+          } else if (user && user.id) {
+            setUserId(user.id);
           }
         } else {
           // Token is invalid
@@ -133,17 +149,21 @@ const OrdersPage = () => {
     checkAuthStatus();
   }, []);
 
-  // Fetch all user orders from API
+  // Fetch all user orders from API - Now depends on userId state
   const fetchOrders = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false);
+    if (!userId) {
+      // Don't show error yet, we might still be checking auth
+      if (!isCheckingAuth) {
+        toast.error("User ID not found. Please log in again.");
+        router.push("/login");
+      }
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await getUserOrders(user?.id);
+      const response = await getUserOrders(userId);
 
       if (response.error) {
         toast.error(response.error);
@@ -157,18 +177,27 @@ const OrdersPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId, isCheckingAuth, router]);
+
+  // Effects - Fetch orders when userId changes or auth check completes
+  useEffect(() => {
+    if (!isCheckingAuth && userId) {
+      fetchOrders();
+    }
+  }, [fetchOrders, isCheckingAuth, userId]);
+
+  // Set userId from user object if it becomes available
+  useEffect(() => {
+    if (user && user.id && !userId) {
+      setUserId(user.id);
+    }
+  }, [user, userId]);
 
   // Handler for viewing order details
   const handleViewDetails = (order: Order) => {
     setCurrentOrder(order);
     setIsModalOpen(true);
   };
-
-  // Effects
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
 
   if (isCheckingAuth) {
     return (
@@ -197,7 +226,7 @@ const OrdersPage = () => {
   }
 
   return (
-    <div className="container max-w-7xl py-8 px-4 md:px-6 lg:py-12 min-h-[80vh]">
+    <div className="container max-w-7xl mx-auto py-8 px-4 md:px-6 lg:py-12 min-h-[80vh]">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">
@@ -237,108 +266,187 @@ const OrdersPage = () => {
                 </Link>
               </div>
             ) : (
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>
-                        <div className="flex items-center">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          Booking Date
-                        </div>
-                      </TableHead>
-                      <TableHead>Photography Service</TableHead>
-                      <TableHead>
-                        <div className="flex items-center">
-                          <CreditCard className="mr-2 h-4 w-4" />
-                          Payment Amount
-                        </div>
-                      </TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Payment Status</TableHead>
-                      <TableHead className="text-right">Details</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell>
-                          <div className="font-medium">
-                            {format(new Date(order.date), "MMM dd, yyyy")}
+              <>
+                {/* Desktop view - Table (hidden on mobile) */}
+                <div className="hidden md:block rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>
+                          <div className="flex items-center">
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            Booking Date
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {order.time}
+                        </TableHead>
+                        <TableHead>Photography Service</TableHead>
+                        <TableHead>
+                          <div className="flex items-center">
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Payment Amount
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-[200px] font-medium">
-                            {order.product_title}
+                        </TableHead>
+                        <TableHead>Order Status</TableHead>
+                        <TableHead>Payment Status</TableHead>
+                        <TableHead className="text-right">Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell>
+                            <div className="font-medium">
+                              {format(new Date(order.date), "MMM dd, yyyy")}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {order.time}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-[200px] font-medium">
+                              {order.product_title}
 
-                            {order.address && (
-                              <div className="text-xs text-muted-foreground truncate">
-                                {order.address.length > 20
-                                  ? `${order.address.slice(0, 20)}...`
-                                  : order.address}
+                              {order.address && (
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {order.address.length > 20
+                                    ? `${order.address.slice(0, 20)}...`
+                                    : order.address}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">
+                              {formatCurrency(
+                                Number(order.paid_amount) / 100,
+                                order.currency
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <Badge
+                                className={getStatusBadgeColor(
+                                  order.order_status
+                                )}
+                              >
+                                {order.order_status.charAt(0).toUpperCase() +
+                                  order.order_status.slice(1)}
+                              </Badge>
+                              <div className="text-xs text-muted-foreground">
+                                {getStatusDescription(order.order_status)}
                               </div>
-                            )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              className={getPaymentStatusBadgeColor(
+                                order.payment_status || "pending"
+                              )}
+                            >
+                              {(order.payment_status || "pending")
+                                .charAt(0)
+                                .toUpperCase() +
+                                (order.payment_status || "pending").slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(order)}
+                            >
+                              View Details
+                              <ExternalLink className="ml-1 h-3 w-3" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile view - Cards (visible only on mobile) */}
+                <div className="md:hidden space-y-4">
+                  {orders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="border rounded-lg p-4 bg-card hover:bg-muted/10 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-medium">{order.product_title}</h3>
+                        <Badge
+                          className={getStatusBadgeColor(order.order_status)}
+                        >
+                          {order.order_status.charAt(0).toUpperCase() +
+                            order.order_status.slice(1)}
+                        </Badge>
+                      </div>
+
+                      <div className="space-y-2 mb-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                          <span>
+                            {format(new Date(order.date), "MMM dd, yyyy")}
+                          </span>
+                        </div>
+
+                        {order.time && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                            <span>{order.time}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">
+                        )}
+
+                        {order.address && (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                            <span className="truncate">{order.address}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                          <span>
                             {formatCurrency(
                               Number(order.paid_amount) / 100,
                               order.currency
                             )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <Badge
-                              className={getStatusBadgeColor(
-                                order.order_status
-                              )}
-                            >
-                              {order.order_status.charAt(0).toUpperCase() +
-                                order.order_status.slice(1)}
-                            </Badge>
-                            <div className="text-xs text-muted-foreground">
-                              {getStatusDescription(order.order_status)}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
+                          </span>
                           <Badge
-                            className={getPaymentStatusBadgeColor(
+                            className={`ml-auto ${getPaymentStatusBadgeColor(
                               order.payment_status || "pending"
-                            )}
+                            )}`}
+                            variant="outline"
                           >
                             {(order.payment_status || "pending")
                               .charAt(0)
                               .toUpperCase() +
                               (order.payment_status || "pending").slice(1)}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(order)}
-                          >
-                            View Details
-                            <ExternalLink className="ml-1 h-3 w-3" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(order)}
+                        className="w-full"
+                      >
+                        View Details
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </CardContent>
-          <CardFooter className="text-sm text-muted-foreground border-t pt-4">
-            Need help with your booking? Contact our support team at
+          <CardFooter className="text-sm text-muted-foreground border-t pt-4 flex flex-wrap gap-1">
+            <span>
+              Need help with your booking? Contact our support team at
+            </span>
             <Link
-              className="hover:underline ml-1 hover:text-blue-500"
+              className="hover:underline hover:text-blue-500"
               href="mailto:m.rose.a.photography@gmail.com"
             >
               m.rose.a.photography@gmail.com

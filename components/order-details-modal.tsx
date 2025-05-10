@@ -110,7 +110,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md sm:max-w-lg">
+      <DialogContent className="max-w-md sm:max-w-lgq max-h-[90%] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Your Photography Booking Details</DialogTitle>
           <DialogDescription>

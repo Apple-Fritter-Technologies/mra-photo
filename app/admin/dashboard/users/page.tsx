@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, UserCog } from "lucide-react";
+import { Loader2, UserCog, Mail, Phone, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -11,6 +11,15 @@ import { getAllUsers } from "@/lib/actions/user-action";
 import UserModal from "../../components/user-modal";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -55,9 +64,9 @@ const UsersPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-4">
-      <div className="flex justify-between flex-wrap gap-4 items-center sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border border-white/10 p-4">
-        <h1 className="text-2xl font-bold">User Management</h1>
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 space-y-4">
+      <div className="flex justify-between flex-wrap gap-2 sm:gap-4 items-center sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border border-white/10 p-3 sm:p-4">
+        <h1 className="text-xl sm:text-2xl font-bold">User Management</h1>
       </div>
 
       {error && (
@@ -90,60 +99,118 @@ const UsersPage = () => {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="text-left bg-muted/50">
-                <th className="p-4 font-medium">Name</th>
-                <th className="p-4 font-medium">Email</th>
-                <th className="p-4 font-medium">Phone</th>
-                <th className="p-4 font-medium">Role</th>
-                <th className="p-4 font-medium">Created</th>
-                <th className="p-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-t border-muted hover:bg-muted/20 transition-colors"
-                >
-                  <td className="p-4">{user.name || "—"}</td>
-                  <td className="p-4">{user.email}</td>
-                  <td className="p-4">{user.phone || "—"}</td>
-                  <td className="p-4">
-                    <Badge
-                      className={cn(
-                        user.role === "admin"
-                          ? "bg-secondary text-white"
-                          : "bg-primary text-black"
-                      )}
-                    >
-                      {user.role}
-                    </Badge>
-                  </td>
-                  <td className="p-4">
-                    {user.created_at
-                      ? format(new Date(user.created_at), "MMM d, yyyy")
-                      : "—"}
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex justify-end gap-2">
+        <div>
+          {/* Desktop view - Shadcn Table */}
+          <div className="hidden lg:block rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">
+                      {user.name || "—"}
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone || "—"}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={cn(
+                          user.role === "admin"
+                            ? "bg-secondary text-white"
+                            : "bg-primary text-black"
+                        )}
+                      >
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {user.created_at
+                        ? format(new Date(user.created_at), "MMM d, yyyy")
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEditUserRole(user)}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 ml-auto"
                       >
                         <UserCog size={14} />
                         Manage
                       </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile view - cards */}
+          <div className="lg:hidden space-y-4">
+            {users.map((user) => (
+              <div
+                key={user.id}
+                className="p-4 border rounded-lg bg-card hover:bg-muted/10 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-medium text-base">
+                    {user.name || "Unnamed User"}
+                  </h3>
+                  <Badge
+                    className={cn(
+                      user.role === "admin"
+                        ? "bg-secondary text-white"
+                        : "bg-primary text-black"
+                    )}
+                  >
+                    {user.role}
+                  </Badge>
+                </div>
+
+                <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Mail size={14} className="flex-shrink-0" />
+                    <span className="truncate">{user.email}</span>
+                  </div>
+
+                  {user.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone size={14} className="flex-shrink-0" />
+                      <span>{user.phone}</span>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  )}
+
+                  {user.created_at && (
+                    <div className="flex items-center gap-2">
+                      <Calendar size={14} className="flex-shrink-0" />
+                      <span>
+                        {format(new Date(user.created_at), "MMM d, yyyy")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEditUserRole(user)}
+                  className="flex items-center gap-1 w-full justify-center"
+                >
+                  <UserCog size={14} />
+                  Manage User
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
