@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/product-card";
 
 const InvestmentPage = () => {
-  const img = "/images/landscape.jpg";
+  const img = "/images/investment/investment.png";
 
   const [sessions, setSessions] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ const InvestmentPage = () => {
 
   return (
     <div className="container mx-auto px-4 flex flex-col gap-8 pb-16">
-      <ImageHeader img={img} title="Investment" />
+      <ImageHeader img={img} title="Investment" position="center" />
 
       <div className="flex flex-col items-center">
         <PageTitle

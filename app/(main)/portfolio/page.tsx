@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 const PortfolioPage = () => {
-  const img = "/images/landscape.jpg";
+  const img = "/images/portfolio/portfolio.png";
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -56,7 +56,7 @@ const PortfolioPage = () => {
 
   return (
     <div className="container mx-auto px-4 flex flex-col gap-4">
-      <ImageHeader img={img} title="Portfolio" />
+      <ImageHeader img={img} title="Portfolio" position="center" />
 
       <PageTitle title="Maria Rose" subtitle="PHOTOGRAPHER" />
 

@@ -4,8 +4,9 @@ import { ImageHeaderProps } from "@/types/intrerface";
 import Image from "next/image";
 import React from "react";
 import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 
-const ImageHeader = ({ img, title }: ImageHeaderProps) => {
+const ImageHeader = ({ img, title, position = "top" }: ImageHeaderProps) => {
   // Animation variants with increased speed
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -70,7 +71,10 @@ const ImageHeader = ({ img, title }: ImageHeaderProps) => {
           width={1200}
           height={1200}
           priority
-          className="rounded-lg shadow-lg object-cover object-top w-full max-h-[500px]"
+          className={cn(
+            "rounded-lg shadow-lg object-cover w-full max-h-[500px]",
+            `object-${position}`
+          )}
         />
       </motion.div>
 

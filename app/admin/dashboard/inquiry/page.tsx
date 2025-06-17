@@ -27,7 +27,7 @@ const statusColors: StatusColorMap = {
   cancelled: "bg-red-200 text-red-800",
 };
 
-const BookingsPage = () => {
+const DashboardInquiryPage = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -105,13 +105,13 @@ const BookingsPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-2 z-10 backdrop-blur-xl bg-background/50 rounded-lg border border-white/10 p-4">
-        <h1 className="text-2xl font-bold">Booking Management</h1>
+        <h1 className="text-2xl font-bold">Inquiry Management</h1>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[300px]">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search bookings..."
+              placeholder="Search inquiry..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -139,7 +139,7 @@ const BookingsPage = () => {
 
       {error && (
         <div className="text-red-500 text-center py-4 bg-muted/50 rounded-lg">
-          <p>Error fetching bookings. Please try again.</p>
+          <p>Error fetching inquiries. Please try again.</p>
           <Button
             variant="outline"
             className="mt-4"
@@ -161,9 +161,9 @@ const BookingsPage = () => {
 
       {!loading && !error && bookings.length === 0 ? (
         <div className="text-center py-12 bg-muted/50 rounded-lg">
-          <h3 className="text-lg font-medium">No bookings yet</h3>
+          <h3 className="text-lg font-medium">No inquiries yet</h3>
           <p className="text-sm text-muted-foreground mt-2">
-            When clients make bookings, they will appear here
+            When clients make inquiries, they will appear here
           </p>
         </div>
       ) : (
@@ -246,7 +246,7 @@ const BookingsPage = () => {
 
       {!loading && !error && filteredBookings.length === 0 && searchTerm && (
         <div className="text-center py-8 bg-muted/30 rounded-lg">
-          <p>No bookings found matching &quot;{searchTerm}&quot;</p>
+          <p>No inquiries found matching &quot;{searchTerm}&quot;</p>
           <Button
             variant="outline"
             className="mt-4"
@@ -260,4 +260,4 @@ const BookingsPage = () => {
   );
 };
 
-export default BookingsPage;
+export default DashboardInquiryPage;

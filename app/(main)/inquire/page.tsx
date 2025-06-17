@@ -207,7 +207,7 @@ function InquireFormWithSearchParams() {
           description: "Please try again later.",
         });
       } else {
-        toast.success("Booking request submitted!", {
+        toast.success("Inquiry request submitted!", {
           description: "We'll be in touch with you soon!",
         });
         setFormState(initialFormState);

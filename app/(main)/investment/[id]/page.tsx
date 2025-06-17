@@ -193,8 +193,8 @@ const ProductDetailPage = () => {
         Back to All Packages
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-xl">
+      <div className=" grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="sticky top-24 h-[500px] rounded-2xl overflow-hidden shadow-xl">
           <Image
             src={product.image_url}
             alt={product.title}

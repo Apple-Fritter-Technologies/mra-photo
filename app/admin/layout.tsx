@@ -12,10 +12,6 @@ export const metadata: Metadata = {
       follow: false,
     },
   },
-  icons: {
-    icon: [{ url: "/favicon.png" }],
-    apple: [{ url: "/favicon.png" }],
-  },
 };
 
 export default function RootLayout({

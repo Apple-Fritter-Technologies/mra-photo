@@ -28,15 +28,8 @@ export const fetchBookings = async () => {
 };
 
 export const createBooking = async (booking: Booking) => {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) {
-    return { error: "No token found. Please login again." };
-  }
-
   try {
-    const res = await axios.post(`${ApiUrl}/api/booking`, booking, {
-      headers: { Authorization: `Bearer ${sessionToken}` },
-    });
+    const res = await axios.post(`${ApiUrl}/api/booking`, booking);
 
     return res.data;
   } catch (error: unknown) {

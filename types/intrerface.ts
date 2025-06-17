@@ -8,6 +8,7 @@ export interface GalleryModalProps {
 export interface ImageHeaderProps {
   img: string;
   title: string;
+  position?: string;
 }
 
 export interface User {
