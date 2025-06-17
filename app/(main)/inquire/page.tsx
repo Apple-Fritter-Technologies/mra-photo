@@ -461,7 +461,7 @@ function InquireFormWithSearchParams() {
 
                 <div className="space-y-2">
                   <Label htmlFor="referralSource" className="text-lg">
-                    How did you hear about us?{" "}
+                    How did you hear about me?{" "}
                     <span className="text-muted-foreground text-xs">
                       (Optional)
                     </span>

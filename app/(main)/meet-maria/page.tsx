@@ -8,7 +8,7 @@ const MeetMariaPage = () => {
 
   return (
     <div className="container mx-auto px-4 flex flex-col gap-4">
-      <ImageHeader img={img} title="Meet Maria" />
+      <ImageHeader img={img} title="Meet Maria" position="center" />
 
       <div className="flex flex-col items-center">
         <PageTitle title="Maria Rose?" subtitle="WHO IS" />
@@ -22,7 +22,7 @@ const MeetMariaPage = () => {
 
         <IntroductionCard
           title="The Girl Behind The Camera"
-          description="I am a follower of Christ, a wife to the most handsome guy around, and a mommy to my precious daughter and another on the way! You will always find me at my local coffee shop, whether it's six o'clock in the morning or two o'clock in the afternoon. Can you guess why? That's right! Because they serve both coffee AND ice cream!! Two of my favorite things! People always assume I'm a girly girl because I like to get all dolled up, but in reality, I love football, motorcycles, and wrestling! You will always hear me shout GO BLUE while being decked out in Michigan gear on Saturday's come fall time ( the season I thrive in!)."
+          description="I am a follower of Christ, a wife to the most handsome guy around, and a mommy to my  precious children, Chloe and Charles. You will always find me at my local coffee shop, whether it's six o'clock in the morning or two o'clock in the afternoon. Can you guess why? That's right! Because they serve both coffee AND ice cream!! Two of my favorite things! People always assume I'm a girly girl because I like to get all dolled up, but in reality, I love football, motorcycles, and wrestling! You will always hear me shout GO BLUE while being decked out in Michigan gear on Saturday's come fall time ( the season I thrive in!)."
           imageUrl="/images/meet-maria/meet-maria-2.png"
           direction="right"
         />

@@ -24,7 +24,7 @@ const Footer = () => {
     <footer className="bg-gradient-to-b from-primary to-primary/95 pt-12 pb-0 relative overflow-hidden">
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         {/* Mobile logo top center */}
-        <div className="md:hidden flex justify-center mb-8">
+        <div className="md:hidden flex flex-col items-center mb-8">
           <Image
             src="/images/logo.png"
             alt="Maria Photography Logo"
@@ -32,6 +32,10 @@ const Footer = () => {
             height={45}
             className="transition-all duration-300 hover:opacity-90"
           />
+          <p className="mt-3 max-w-xs text-center leading-relaxed opacity-80">
+            Natural light, lifestyle photographer in the Metro Detroit area
+            capturing your precious moments in a candid, crisp, and clean style.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 mb-12">
@@ -110,17 +114,14 @@ const Footer = () => {
               </Link>
             </div>
 
-            {/* Mobile-only tagline */}
-            <p className="md:hidden mt-2 mb-5 max-w-xs text-center leading-relaxed opacity-80">
-              Natural light, lifestyle photographer in the Metro Detroit area.
-            </p>
-
             <div className="italic max-w-xs w-full text-center sm:text-left bg-white/5 p-4 rounded-lg border-l-2 border-secondary/50">
               <p className=" leading-relaxed">
-                &quot;I have set the LORD always before me; because he is at my
-                right hand, I will not be shaken.&quot;
+                &quot;For by him all things were created, in heaven and on
+                earth, visible and invisible, whether thrones or dominions or
+                rulers or authorities—all things were created through him and
+                for him.&quot;
                 <span className="block mt-2 font-semibold text-secondary">
-                  Psalm 16:8
+                  Colossians 1:16 ESV
                 </span>
               </p>
             </div>

@@ -35,7 +35,7 @@ export default function Home() {
 
         <IntroductionCard
           title="My Passion"
-          description="As a mama myself, my passion is to stop time in the way I know how.. To photograph just how tiny baby toes are, the toothless smiles, the ever changing personalities our littles developing into who they are. The years go by too quickly. Take some time to be in the moment with your family and forget about the never ending dishes or the kids' schedules. Be present, have fun, cuddle close, and I promise, the photos you will get from doing these things will be well worth it and cherished forever."
+          description="As a mama myself, my passion is to stop time in the way I know how.. To photograph just how tiny baby toes are, the toothless smiles, and the ever changing personalities our littles have developing into who they really are. The years go by too quickly. Take some time to be in the moment with your family and forget about the never ending dishes or the kids' schedules. Be present, have fun, cuddle close, and I promise, the photos you will get from doing these things will be well worth it and cherished forever."
           imageUrl="/images/home/home-2.jpg"
           direction="right"
         />
