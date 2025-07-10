@@ -162,7 +162,7 @@ export const forgotEmailHtml = ({
             </svg>
             <div class="logo">Photography MRA</div>
           </div>
-          <img src="https://www.photographymra.com/images/meetmaria3.jpg" alt="Photography" class="hero-image">
+          <img src="https://www.photographymra.com/images/landscape.jpg" alt="Photography" class="hero-image">
           <div class="email-content">
             <h1>Reset Your Password</h1>
             <p>Hello <span class="highlight">${name || "there"}</span>,</p>
